@@ -2,11 +2,8 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: #213547;
+  background-color: #ffffff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -15,65 +12,123 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: #004080;
+  text-decoration: none;
 }
 a:hover {
-  color: #535bf2;
+  color: #0066cc;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
+  border-radius: 4px;
+  border: 1px solid #004080;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #004080;
+  color: #fff;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background-color 0.25s, border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  background-color: #0059b3;
+  border-color: #0059b3;
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-.card {
-  padding: 2em;
+.topbar {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #fff;
+}
+.brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #004080;
+}
+.links {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.links a {
+  color: #333;
+}
+.links a.router-link-active {
+  font-weight: 600;
+}
+.welcome {
+  color: #555;
+}
+.btn.small {
+  font-size: 0.8rem;
+  padding: 0.3em 0.6em;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.container {
+  max-width: 960px;
+  margin: 20px auto;
+  padding: 0 16px;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.auction-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.auction-link {
+  text-decoration: none;
+  color: inherit;
+}
+.auction-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 12px;
+  transition: 0.15s box-shadow;
+}
+.auction-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.auction-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.auction-card h3 {
+  margin: 8px 0 4px;
+}
+.auction-card p {
+  color: #555;
+  font-size: 14px;
+  min-height: 40px;
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+  max-width: 560px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 360px;
 }

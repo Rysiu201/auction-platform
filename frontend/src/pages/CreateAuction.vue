@@ -35,15 +35,15 @@ async function submit() {
 
 <template>
   <h1>Nowa aukcja</h1>
-  <form @submit.prevent="submit" style="display:grid;gap:10px;max-width:560px">
+  <form @submit.prevent="submit" class="form">
     <input v-model="title" placeholder="Tytuł" required />
     <textarea v-model="description" placeholder="Opis" rows="4" required />
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div class="form-row">
       <input v-model="basePricePLN" type="number" step="0.01" placeholder="Cena wywoławcza (PLN)" required />
       <input v-model="minIncrementPLN" type="number" step="0.01" placeholder="Min. przebitka (PLN)" required />
       <input v-model="reservePricePLN" type="number" step="0.01" placeholder="Cena minimalna (opc.)" />
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div class="form-row">
       <label>Start: <input v-model="startsAt" type="datetime-local" required /></label>
       <label>Koniec: <input v-model="endsAt" type="datetime-local" required /></label>
     </div>
