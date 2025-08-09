@@ -2,6 +2,8 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "../prisma";
+import ldap from "ldapjs";
+import { promisify } from "util";
 
 export const authRouter = Router();
 
@@ -62,15 +64,33 @@ authRouter.post("/sso", async (_req, res) => {
 });
 
 authRouter.post("/ldap", async (req, res) => {
-  const { username } = req.body ?? {};
-  if (!username) {
-    return res.status(400).json({ message: "Username required" });
+  const { username, password } = req.body ?? {};
+  if (!username || !password) {
+    return res
+      .status(400)
+      .json({ message: "Username and password required" });
   }
-  const email = `${username}@ldap.local`;
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
+
+  const client = ldap.createClient({ url: process.env.LDAP_URL! });
+  const bind = promisify(client.bind).bind(client);
+  const userDn =
+    process.env.LDAP_USER_DN?.replace("{username}", username) ||
+    `uid=${username},${process.env.LDAP_BASE_DN}`;
+  try {
+    await bind(userDn, password);
+  } catch (e) {
     return res.status(401).json({ message: "Invalid LDAP credentials" });
   }
+
+  const emailDomain = process.env.LDAP_EMAIL_DOMAIN || "ldap.local";
+  const email = `${username}@${emailDomain}`;
+  let user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    user = await prisma.user.create({
+      data: { email, passwordHash: "", name: username },
+    });
+  }
+
   const token = jwt.sign(
     { id: user.id, role: user.role, name: user.name },
     process.env.JWT_SECRET!,

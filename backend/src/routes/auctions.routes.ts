@@ -26,6 +26,33 @@ auctionsRouter.get("/", async (_req, res) => {
   res.json(auctions);
 });
 
+// ------------------------ ADMIN OVERVIEW ------------------------
+auctionsRouter.get(
+  "/admin/overview",
+  requireAuth,
+  requireAdmin,
+  async (_req, res) => {
+    const ended = await prisma.auction.findMany({
+      where: { status: "ENDED" },
+      include: {
+        bids: { orderBy: { amount: "desc" } },
+        winnerBid: { include: { user: { select: { id: true, name: true } } } },
+      },
+      orderBy: { endsAt: "desc" },
+    });
+
+    const active = await prisma.auction.findMany({
+      where: { status: "ACTIVE" },
+      orderBy: { endsAt: "asc" },
+    });
+
+    const noBids = ended.filter((a) => a.bids.length === 0);
+    const finished = ended.filter((a) => a.bids.length > 0);
+
+    res.json({ active, ended: finished, noBids });
+  }
+);
+
 // --------------------------- SZCZEGÓŁ ----------------------------
 auctionsRouter.get("/:id", async (req, res) => {
   const a = await prisma.auction.findUnique({
