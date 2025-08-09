@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AuctionStatus {
+  DRAFT
+  ACTIVE
+  ENDED
+  CANCELED
+}
+
+enum LogAction {
+  USER_REGISTER
+  USER_LOGIN
+  AUCTION_CREATE
+  AUCTION_UPDATE
+  AUCTION_DELETE
+  BID_PLACE
+  AUCTION_END
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         Role      @default(USER)
+  createdAt    DateTime  @default(now())
+  bids         Bid[]
+  auctions     Auction[] @relation("SellerAuctions")
+}
+
+model Auction {
+  id           String         @id @default(cuid())
+  title        String
+  description  String
+  basePrice    Int
+  minIncrement Int
+  reservePrice Int?
+  status       AuctionStatus  @default(DRAFT)
+  startsAt     DateTime
+  endsAt       DateTime
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  seller       User           @relation("SellerAuctions", fields: [sellerId], references: [id])
+  sellerId     String
+  bids         Bid[]
+  images       AuctionImage[]
+  winnerBidId  String?        @unique // <--- tu dodane
+  winnerBid    Bid?           @relation("Winner", fields: [winnerBidId], references: [id])
+}
+
+model AuctionImage {
+  id        String  @id @default(cuid())
+  url       String
+  position  Int
+  auction   Auction @relation(fields: [auctionId], references: [id])
+  auctionId String
+}
+
+model Bid {
+  id        String   @id @default(cuid())
+  amount    Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  auction   Auction  @relation(fields: [auctionId], references: [id])
+  auctionId String
+  winnerOf  Auction? @relation("Winner") // <--- to dodajemy
+}
+
+model AuditLog {
+  id        String    @id @default(cuid())
+  action    LogAction
+  userId    String?
+  ip        String?
+  meta      Json
+  createdAt DateTime  @default(now())
+}
