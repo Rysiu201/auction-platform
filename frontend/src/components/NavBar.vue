@@ -23,11 +23,14 @@ function logout() {
       <span class="logo-om">om software</span>
     </router-link>
     <nav class="nav-links">
-      <router-link to="/">Lista</router-link>
+      <router-link to="/">Start</router-link>
+      <router-link to="/auctions">Aukcje</router-link>
+      <router-link to="/info">Informacje</router-link>
+      <router-link to="/contact">Kontakt</router-link>
       <router-link v-if="user?.role==='ADMIN'" to="/create">Dodaj aukcję</router-link>
-      <router-link v-if="user?.role==='ADMIN'" to="/admin">Panel admina</router-link>
     </nav>
     <div class="user-links">
+      <router-link v-if="user?.role==='ADMIN'" to="/admin" class="admin-link">Panel admina</router-link>
       <router-link v-if="!user" to="/login">Zaloguj</router-link>
       <span v-else class="welcome">Witaj, {{ user.name }}</span>
       <button v-if="user" class="btn small" @click="logout">Wyloguj</button>

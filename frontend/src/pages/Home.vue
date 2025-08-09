@@ -1,68 +1,27 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { api } from "@/api";
-
-const backend = import.meta.env.VITE_BACKEND_URL as string;
-
-type Auction = {
-  id: string;
-  title: string;
-  description: string;
-  endsAt: string;
-  images: { url: string; position: number }[];
-  basePrice: number;
-  minIncrement: number;
-};
-
-const auctions = ref<Auction[]>([]);
-const loading = ref(true);
-const error = ref<string | null>(null);
-
-onMounted(async () => {
-  try {
-    const { data } = await api.get("/auctions");
-    auctions.value = data;
-  } catch (e: any) {
-    error.value = e?.message ?? "Błąd";
-  } finally {
-    loading.value = false;
-  }
-});
-
-function fmtDate(s: string) {
-  return new Date(s).toLocaleString();
-}
 </script>
 
 <template>
-  <h1>Aktywne aukcje</h1>
-
-  <p v-if="loading">Ładowanie…</p>
-  <p v-if="error" style="color:red">{{ error }}</p>
-
-  <div
-    v-if="!loading && auctions.length"
-    class="auction-grid"
-  >
-    <router-link
-      v-for="a in auctions"
-      :key="a.id"
-      :to="`/auction/${a.id}`"
-      class="auction-link"
-    >
-      <article class="auction-card">
-        <img
-          v-if="a.images?.[0]"
-          :src="`${backend}${a.images[0].url}`"
-          alt=""
-          class="auction-image"
-        />
-        <h3>{{ a.title }}</h3>
-        <p>{{ a.description }}</p>
-        <small>Kończy się: {{ fmtDate(a.endsAt) }}</small>
-      </article>
-    </router-link>
-  </div>
-
-  <p v-else-if="!loading && !auctions.length">Brak aktywnych aukcji.</p>
+  <section class="home-section top">
+    <h1>Witamy w Altkom Software</h1>
+    <p>Platforma aukcyjna z nowoczesnym, szarym motywem.</p>
+  </section>
+  <section class="home-section middle">
+    <h2>Dlaczego my?</h2>
+    <p>Bezpieczne licytacje, przejrzysty panel administracyjny i szybkie płatności.</p>
+  </section>
+  <section class="home-section bottom">
+    <h2>Dołącz do nas</h2>
+    <p>Załóż konto i wystaw swoją pierwszą aukcję już dziś.</p>
+  </section>
 </template>
+
+<style scoped>
+.home-section {
+  padding: 40px 20px;
+  text-align: center;
+}
+.top { background: #f0f0f0; }
+.middle { background: #e0e0e0; }
+.bottom { background: #d0d0d0; }
+</style>

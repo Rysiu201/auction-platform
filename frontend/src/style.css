@@ -73,7 +73,7 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   background: #ff4f64;
-  margin: 0 -4px;
+  margin: 0 2px;
   padding: 0 4px;
 }
 .logo-k {
@@ -104,6 +104,19 @@ button:focus-visible {
   display: flex;
   gap: 12px;
   align-items: center;
+}
+.admin-link {
+  color: #1c1c1c;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+.admin-link:hover {
+  background: #d0d0d0;
+}
+.admin-link.router-link-active {
+  background: #0059b3;
+  color: #fff;
 }
 .welcome {
   color: #555;
@@ -182,6 +195,10 @@ button:focus-visible {
   border-top: 4px solid #0059b3;
 }
 
+.create-auction-card h1 {
+  text-align: center;
+}
+
 .preview-images {
   display: flex;
   flex-wrap: wrap;
@@ -256,6 +273,7 @@ button:focus-visible {
   width: 200px;
   background: #f0f0f0;
   padding: 20px;
+  border-right: 1px solid #d6d6d6;
 }
 
 .admin-nav ul {
@@ -291,9 +309,15 @@ button:focus-visible {
   flex: 1;
 }
 
+.admin-content {
+  flex: 1;
+  padding: 20px;
+}
+
 .overview-column table {
   width: 100%;
   border-collapse: collapse;
+  background: #fff;
 }
 
 .overview-column th,

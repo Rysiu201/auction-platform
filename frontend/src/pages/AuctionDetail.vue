@@ -71,11 +71,21 @@ onUnmounted(() => {
     <h1 style="margin-bottom:8px">{{ auction.title }}</h1>
 
     <div style="display:flex; gap:16px; align-items:flex-start">
-      <img
-        v-if="auction.images?.[0]"
-        :src="`${backend}${auction.images[0].url}`"
-        style="width:360px;height:240px;object-fit:cover;border-radius:8px"
-      />
+      <div style="display:flex; flex-direction:column; gap:8px">
+        <img
+          v-if="auction.images?.[0]"
+          :src="`${backend}${auction.images[0].url}`"
+          style="width:360px;height:240px;object-fit:cover;border-radius:8px"
+        />
+        <div v-if="auction.images?.length > 1" style="display:flex; gap:4px; flex-wrap:wrap">
+          <img
+            v-for="img in auction.images.slice(1)"
+            :key="img.url"
+            :src="`${backend}${img.url}`"
+            style="width:80px;height:60px;object-fit:cover;border-radius:4px"
+          />
+        </div>
+      </div>
       <div style="flex:1">
         <p style="margin:8px 0 16px">{{ auction.description }}</p>
         <div>Kończy się: {{ new Date(auction.endsAt).toLocaleString() }}</div>

@@ -26,6 +26,9 @@ const minIncrementPLN = ref('');
 const startsAt = ref('');
 const endsAt = ref('');
 
+function toISO(dt: string) {
+  return dt ? new Date(dt).toISOString() : '';
+}
 function fmtDate(dt: string) {
   return new Date(dt).toLocaleString();
 }
@@ -58,8 +61,8 @@ async function submitRelist() {
     await api.post(`/auctions/${relistAuction.value.id}/relist`, {
       basePricePLN: basePricePLN.value,
       minIncrementPLN: minIncrementPLN.value,
-      startsAt: startsAt.value,
-      endsAt: endsAt.value,
+      startsAt: toISO(startsAt.value),
+      endsAt: toISO(endsAt.value),
     });
     relistAuction.value = null;
     await fetchOverview();
@@ -84,41 +87,53 @@ async function submitRelist() {
           <div class="overview-column">
             <h2>Aktywne</h2>
             <table>
-              <tr><th>Tytuł</th><th>Koniec</th></tr>
-              <tr v-for="a in overview.active" :key="a.id">
-                <td>{{ a.title }}</td>
-                <td>{{ fmtDate(a.endsAt) }}</td>
-              </tr>
+              <thead>
+                <tr><th>Tytuł</th><th>Koniec</th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="a in overview.active" :key="a.id">
+                  <td>{{ a.title }}</td>
+                  <td>{{ fmtDate(a.endsAt) }}</td>
+                </tr>
+              </tbody>
             </table>
           </div>
           <div class="overview-column">
             <h2>Zakończone</h2>
             <table>
-              <tr><th>Tytuł</th><th>Zwycięzca</th><th>Kwota</th></tr>
-              <tr v-for="a in overview.ended" :key="a.id">
-                <td>{{ a.title }}</td>
-                <td>{{ a.winnerBid?.user.name || '—' }}</td>
-                <td>{{ fmtPrice(a.winnerBid?.amount || 0) }}</td>
-              </tr>
+              <thead>
+                <tr><th>Tytuł</th><th>Zwycięzca</th><th>Kwota</th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="a in overview.ended" :key="a.id">
+                  <td>{{ a.title }}</td>
+                  <td>{{ a.winnerBid?.user.name || '—' }}</td>
+                  <td>{{ fmtPrice(a.winnerBid?.amount || 0) }}</td>
+                </tr>
+              </tbody>
             </table>
           </div>
           <div class="overview-column">
             <h2>Do ponownego wystawienia</h2>
             <table>
-              <tr>
-                <th>Tytuł</th>
-                <th>Cena</th>
-                <th>Start</th>
-                <th>Koniec</th>
-                <th></th>
-              </tr>
-              <tr v-for="a in overview.noBids" :key="a.id">
-                <td>{{ a.title }}</td>
-                <td>{{ fmtPrice(a.basePrice) }}</td>
-                <td>{{ fmtDate(a.startsAt) }}</td>
-                <td>{{ fmtDate(a.endsAt) }}</td>
-                <td><button class="btn small" @click="openRelist(a)">Wystaw ponownie</button></td>
-              </tr>
+              <thead>
+                <tr>
+                  <th>Tytuł</th>
+                  <th>Cena</th>
+                  <th>Start</th>
+                  <th>Koniec</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="a in overview.noBids" :key="a.id">
+                  <td>{{ a.title }}</td>
+                  <td>{{ fmtPrice(a.basePrice) }}</td>
+                  <td>{{ fmtDate(a.startsAt) }}</td>
+                  <td>{{ fmtDate(a.endsAt) }}</td>
+                  <td><button class="btn small" @click="openRelist(a)">Wystaw ponownie</button></td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </div>

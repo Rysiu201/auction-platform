@@ -7,8 +7,10 @@ const router = useRouter();
 const title = ref(""); const description = ref("");
 const basePricePLN = ref(""); const minIncrementPLN = ref("");
 const reservePricePLN = ref(""); const startsAt = ref(""); const endsAt = ref("");
-const images = ref<FileList|null>(null);
-const previews = ref<string[]>([]);
+const mainImage = ref<File|null>(null);
+const extraImages = ref<FileList|null>(null);
+const mainPreview = ref<string>('');
+const extraPreviews = ref<string[]>([]);
 const ok = ref<string|null>(null); const error = ref<string|null>(null); const loading = ref(false);
 
 function toISO(dt: string) { return dt ? new Date(dt).toISOString() : ""; }
@@ -24,7 +26,8 @@ async function submit() {
     if (reservePricePLN.value) fd.append("reservePricePLN", reservePricePLN.value);
     fd.append("startsAt", toISO(startsAt.value));
     fd.append("endsAt", toISO(endsAt.value));
-    if (images.value) Array.from(images.value).forEach(f => fd.append("images", f));
+    if (mainImage.value) fd.append("images", mainImage.value);
+    if (extraImages.value) Array.from(extraImages.value).forEach(f => fd.append("images", f));
 
     const { data } = await api.post("/auctions", fd);
     ok.value = `Utworzono: ${data.title}`; setTimeout(() => router.push("/"), 700);
@@ -33,10 +36,16 @@ async function submit() {
   } finally { loading.value = false; }
 }
 
-function onFiles(e: Event) {
+function onMain(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0] || null;
+  mainImage.value = file;
+  mainPreview.value = file ? URL.createObjectURL(file) : '';
+}
+
+function onExtras(e: Event) {
   const files = (e.target as HTMLInputElement).files;
-  images.value = files;
-  previews.value = files ? Array.from(files).map(f => URL.createObjectURL(f)) : [];
+  extraImages.value = files;
+  extraPreviews.value = files ? Array.from(files).map(f => URL.createObjectURL(f)) : [];
 }
 </script>
 
@@ -56,9 +65,13 @@ function onFiles(e: Event) {
           <label>Data Rozpoczęcia: <input v-model="startsAt" type="datetime-local" required /></label>
           <label>Data Zakończenia: <input v-model="endsAt" type="datetime-local" required /></label>
         </div>
-        <label>Zdjęcia: <input type="file" multiple @change="onFiles" /></label>
-        <div class="preview-images" v-if="previews.length">
-          <img v-for="(src,i) in previews" :src="src" :key="i" />
+        <label>Główne zdjęcie: <input type="file" @change="onMain" /></label>
+        <div class="preview-images" v-if="mainPreview">
+          <img :src="mainPreview" />
+        </div>
+        <label>Dodatkowe zdjęcia: <input type="file" multiple @change="onExtras" /></label>
+        <div class="preview-images" v-if="extraPreviews.length">
+          <img v-for="(src,i) in extraPreviews" :src="src" :key="i" />
         </div>
         <button :disabled="loading" type="submit">Utwórz aukcję</button>
         <p v-if="ok" style="color:green">{{ ok }}</p>
