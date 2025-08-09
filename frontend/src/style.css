@@ -182,10 +182,6 @@ button:focus-visible {
   border-top: 4px solid #0059b3;
 }
 
-.create-auction-card h1 {
-  text-align: center;
-}
-
 .preview-images {
   display: flex;
   flex-wrap: wrap;
