@@ -8,6 +8,7 @@ const title = ref(""); const description = ref("");
 const basePricePLN = ref(""); const minIncrementPLN = ref("");
 const reservePricePLN = ref(""); const startsAt = ref(""); const endsAt = ref("");
 const images = ref<FileList|null>(null);
+const previews = ref<string[]>([]);
 const ok = ref<string|null>(null); const error = ref<string|null>(null); const loading = ref(false);
 
 function toISO(dt: string) { return dt ? new Date(dt).toISOString() : ""; }
@@ -31,25 +32,38 @@ async function submit() {
     error.value = e?.response?.data?.message ?? "Błąd tworzenia (czy jesteś zalogowany jako ADMIN?)";
   } finally { loading.value = false; }
 }
+
+function onFiles(e: Event) {
+  const files = (e.target as HTMLInputElement).files;
+  images.value = files;
+  previews.value = files ? Array.from(files).map(f => URL.createObjectURL(f)) : [];
+}
 </script>
 
 <template>
-  <h1>Nowa aukcja</h1>
-  <form @submit.prevent="submit" class="form">
-    <input v-model="title" placeholder="Tytuł" required />
-    <textarea v-model="description" placeholder="Opis" rows="4" required />
-    <div class="form-row">
-      <input v-model="basePricePLN" type="number" step="1.0" placeholder="Cena wywoławcza (PLN)" required />
-      <input v-model="minIncrementPLN" type="number" step="1.0" placeholder="Min. przebitka (PLN)" required />
-      <input v-model="reservePricePLN" type="number" step="1.0" placeholder="Cena minimalna (opc.)" />
+  <div class="create-auction-wrapper">
+    <div class="create-auction-card">
+      <h1>Nowa aukcja</h1>
+      <form @submit.prevent="submit" class="form">
+        <input v-model="title" placeholder="Tytuł" required />
+        <textarea v-model="description" placeholder="Opis" rows="4" required />
+        <div class="form-row">
+          <input v-model="basePricePLN" type="number" step="1.0" placeholder="Cena wywoławcza (PLN)" required />
+          <input v-model="minIncrementPLN" type="number" step="1.0" placeholder="Min. przebitka (PLN)" required />
+          <input v-model="reservePricePLN" type="number" step="1.0" placeholder="Cena minimalna (opc.)" />
+        </div>
+        <div class="form-row">
+          <label>Data Rozpoczęcia: <input v-model="startsAt" type="datetime-local" required /></label>
+          <label>Data Zakończenia: <input v-model="endsAt" type="datetime-local" required /></label>
+        </div>
+        <label>Zdjęcia: <input type="file" multiple @change="onFiles" /></label>
+        <div class="preview-images" v-if="previews.length">
+          <img v-for="(src,i) in previews" :src="src" :key="i" />
+        </div>
+        <button :disabled="loading" type="submit">Utwórz aukcję</button>
+        <p v-if="ok" style="color:green">{{ ok }}</p>
+        <p v-if="error" style="color:red">{{ error }}</p>
+      </form>
     </div>
-    <div class="form-row">
-      <label>Data Rozpoczęcia: <input v-model="startsAt" type="datetime-local" required /></label>
-      <label>Data Zakończenia: <input v-model="endsAt" type="datetime-local" required /></label>
-    </div>
-    <label>Zdjęcia: <input type="file" multiple @change="e => images = (e.target as HTMLInputElement).files" /></label>
-    <button :disabled="loading" type="submit">Utwórz aukcję</button>
-    <p v-if="ok" style="color:green">{{ ok }}</p>
-    <p v-if="error" style="color:red">{{ error }}</p>
-  </form>
+  </div>
 </template>
