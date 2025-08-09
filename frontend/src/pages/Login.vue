@@ -18,14 +18,44 @@ async function submit() {
     error.value = e?.response?.data?.message ?? "Błąd logowania";
   } finally { loading.value = false; }
 }
+
+async function loginSSO() {
+  loading.value = true; error.value = null;
+  try {
+    const { data } = await api.post("/auth/sso");
+    localStorage.setItem("user", JSON.stringify(data));
+    router.push("/");
+  } catch (e:any) {
+    error.value = e?.response?.data?.message ?? "Błąd logowania SSO";
+  } finally { loading.value = false; }
+}
+
+async function loginLDAP() {
+  loading.value = true; error.value = null;
+  try {
+    const { data } = await api.post("/auth/ldap", { username: email.value, password: password.value });
+    localStorage.setItem("user", JSON.stringify(data));
+    router.push("/");
+  } catch (e:any) {
+    error.value = e?.response?.data?.message ?? "Błąd logowania LDAP";
+  } finally { loading.value = false; }
+}
 </script>
 
 <template>
-  <h1>Logowanie</h1>
-  <form @submit.prevent="submit" class="login-form">
-    <input v-model="email" type="email" placeholder="email" required />
-    <input v-model="password" type="password" placeholder="hasło" required />
-    <button :disabled="loading" type="submit">Zaloguj</button>
-    <p v-if="error" style="color:red">{{ error }}</p>
-  </form>
+  <div class="login-container">
+    <div class="login-card">
+      <h1>Logowanie</h1>
+      <form @submit.prevent="submit" class="login-form">
+        <input v-model="email" type="email" placeholder="email" required />
+        <input v-model="password" type="password" placeholder="hasło" required />
+        <button :disabled="loading" type="submit">Zaloguj</button>
+      </form>
+      <div class="alt-logins">
+        <button type="button" @click="loginSSO">Zaloguj przez SSO</button>
+        <button type="button" @click="loginLDAP">Zaloguj przez LDAP</button>
+      </div>
+      <p v-if="error" class="error">{{ error }}</p>
+    </div>
+  </div>
 </template>

@@ -3,7 +3,7 @@
   line-height: 1.5;
   font-weight: 400;
   color: #213547;
-  background-color: #ffffff;
+  background-color: #f5f7fa;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -45,28 +45,35 @@ button:focus-visible {
 }
 
 .topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
   padding: 12px 24px;
   border-bottom: 1px solid #e5e5e5;
-  background: #fff;
+  background: #f0f4f8;
 }
 .brand {
   font-weight: 700;
   font-size: 1.1rem;
   color: #004080;
 }
-.links {
-  margin-left: auto;
+.nav-links {
+  justify-self: center;
   display: flex;
   gap: 12px;
   align-items: center;
 }
-.links a {
+.nav-links a {
   color: #333;
 }
-.links a.router-link-active {
+.nav-links a.router-link-active {
   font-weight: 600;
+}
+.user-links {
+  justify-self: end;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 .welcome {
   color: #555;
@@ -131,4 +138,44 @@ button:focus-visible {
   flex-direction: column;
   gap: 10px;
   max-width: 360px;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.login-card {
+  background: #fff;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.alt-logins {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alt-logins button {
+  background: #eee;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.alt-logins button:hover {
+  background: #e0e0e0;
+  border-color: #bbb;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+  text-align: center;
 }
