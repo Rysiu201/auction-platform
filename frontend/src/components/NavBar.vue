@@ -17,7 +17,11 @@ function logout() {
 
 <template>
   <header class="topbar">
-    <router-link to="/" class="brand">Altkom Software &amp; Consulting</router-link>
+    <router-link to="/" class="brand" aria-label="Altkom Software">
+      <span class="logo-alt">alt</span>
+      <span class="logo-box"><span class="logo-k">k</span></span>
+      <span class="logo-om">om software</span>
+    </router-link>
     <nav class="nav-links">
       <router-link to="/">Lista</router-link>
       <router-link v-if="user?.role==='ADMIN'" to="/create">Dodaj aukcję</router-link>
