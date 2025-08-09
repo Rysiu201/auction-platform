@@ -29,7 +29,6 @@ const endsAt = ref('');
 function toISO(dt: string) {
   return dt ? new Date(dt).toISOString() : '';
 }
-
 function fmtDate(dt: string) {
   return new Date(dt).toLocaleString();
 }
