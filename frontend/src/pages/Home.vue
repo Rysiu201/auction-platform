@@ -42,23 +42,23 @@ function fmtDate(s: string) {
 
   <div
     v-if="!loading && auctions.length"
-    style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px"
+    class="auction-grid"
   >
     <router-link
       v-for="a in auctions"
       :key="a.id"
       :to="`/auction/${a.id}`"
-      style="text-decoration:none;color:inherit"
+      class="auction-link"
     >
-      <article style="border:1px solid #eee;border-radius:8px;padding:12px;transition:.15s box-shadow">
+      <article class="auction-card">
         <img
           v-if="a.images?.[0]"
           :src="`${backend}${a.images[0].url}`"
           alt=""
-          style="width:100%;height:160px;object-fit:cover;border-radius:6px"
+          class="auction-image"
         />
-        <h3 style="margin:8px 0 4px">{{ a.title }}</h3>
-        <p style="color:#555;font-size:14px;min-height:40px">{{ a.description }}</p>
+        <h3>{{ a.title }}</h3>
+        <p>{{ a.description }}</p>
         <small>Kończy się: {{ fmtDate(a.endsAt) }}</small>
       </article>
     </router-link>

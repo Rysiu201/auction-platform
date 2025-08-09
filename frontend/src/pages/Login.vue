@@ -22,7 +22,7 @@ async function submit() {
 
 <template>
   <h1>Logowanie</h1>
-  <form @submit.prevent="submit" style="display:flex;flex-direction:column;gap:10px;max-width:360px">
+  <form @submit.prevent="submit" class="login-form">
     <input v-model="email" type="email" placeholder="email" required />
     <input v-model="password" type="password" placeholder="hasło" required />
     <button :disabled="loading" type="submit">Zaloguj</button>
