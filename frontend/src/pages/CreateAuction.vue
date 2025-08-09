@@ -5,7 +5,7 @@ import { api } from "@/api";
 
 const router = useRouter();
 const title = ref(""); const description = ref("");
-const basePricePLN = ref("1000"); const minIncrementPLN = ref("10");
+const basePricePLN = ref(""); const minIncrementPLN = ref("");
 const reservePricePLN = ref(""); const startsAt = ref(""); const endsAt = ref("");
 const images = ref<FileList|null>(null);
 const ok = ref<string|null>(null); const error = ref<string|null>(null); const loading = ref(false);
@@ -39,13 +39,13 @@ async function submit() {
     <input v-model="title" placeholder="Tytuł" required />
     <textarea v-model="description" placeholder="Opis" rows="4" required />
     <div class="form-row">
-      <input v-model="basePricePLN" type="number" step="0.01" placeholder="Cena wywoławcza (PLN)" required />
-      <input v-model="minIncrementPLN" type="number" step="0.01" placeholder="Min. przebitka (PLN)" required />
-      <input v-model="reservePricePLN" type="number" step="0.01" placeholder="Cena minimalna (opc.)" />
+      <input v-model="basePricePLN" type="number" step="1.0" placeholder="Cena wywoławcza (PLN)" required />
+      <input v-model="minIncrementPLN" type="number" step="1.0" placeholder="Min. przebitka (PLN)" required />
+      <input v-model="reservePricePLN" type="number" step="1.0" placeholder="Cena minimalna (opc.)" />
     </div>
     <div class="form-row">
-      <label>Start: <input v-model="startsAt" type="datetime-local" required /></label>
-      <label>Koniec: <input v-model="endsAt" type="datetime-local" required /></label>
+      <label>Data Rozpoczęcia: <input v-model="startsAt" type="datetime-local" required /></label>
+      <label>Data Zakończenia: <input v-model="endsAt" type="datetime-local" required /></label>
     </div>
     <label>Zdjęcia: <input type="file" multiple @change="e => images = (e.target as HTMLInputElement).files" /></label>
     <button :disabled="loading" type="submit">Utwórz aukcję</button>
