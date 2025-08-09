@@ -46,6 +46,40 @@ authRouter.post("/login", async (req, res) => {
   res.json({ id: user.id, role: user.role, name: user.name });
 });
 
+authRouter.post("/sso", async (_req, res) => {
+  const email = "sso@local.test";
+  let user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    user = await prisma.user.create({ data: { email, passwordHash: "", name: "SSO User" } });
+  }
+  const token = jwt.sign(
+    { id: user.id, role: user.role, name: user.name },
+    process.env.JWT_SECRET!,
+    { expiresIn: "7d" }
+  );
+  res.cookie("token", token, { httpOnly: true, sameSite: "lax" });
+  res.json({ id: user.id, role: user.role, name: user.name });
+});
+
+authRouter.post("/ldap", async (req, res) => {
+  const { username } = req.body ?? {};
+  if (!username) {
+    return res.status(400).json({ message: "Username required" });
+  }
+  const email = `${username}@ldap.local`;
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return res.status(401).json({ message: "Invalid LDAP credentials" });
+  }
+  const token = jwt.sign(
+    { id: user.id, role: user.role, name: user.name },
+    process.env.JWT_SECRET!,
+    { expiresIn: "7d" }
+  );
+  res.cookie("token", token, { httpOnly: true, sameSite: "lax" });
+  res.json({ id: user.id, role: user.role, name: user.name });
+});
+
 authRouter.post("/logout", (_req, res) => {
   res.clearCookie("token");
   res.json({ ok: true });

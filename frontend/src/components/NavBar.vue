@@ -18,13 +18,15 @@ function logout() {
 <template>
   <header class="topbar">
     <router-link to="/" class="brand">Altkom Software &amp; Consulting</router-link>
-    <nav class="links">
+    <nav class="nav-links">
       <router-link to="/">Lista</router-link>
       <router-link v-if="user?.role==='ADMIN'" to="/create">Dodaj aukcję</router-link>
       <router-link v-if="user?.role==='ADMIN'" to="/admin">Panel admina</router-link>
+    </nav>
+    <div class="user-links">
       <router-link v-if="!user" to="/login">Zaloguj</router-link>
       <span v-else class="welcome">Witaj, {{ user.name }}</span>
       <button v-if="user" class="btn small" @click="logout">Wyloguj</button>
-    </nav>
+    </div>
   </header>
 </template>
