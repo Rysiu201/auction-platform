@@ -121,6 +121,47 @@ auctionsRouter.post(
   }
 );
 
+// ------------------------ WYSTAW PONOWNIE ----------------------
+auctionsRouter.post(
+  "/:id/relist",
+  requireAuth,
+  requireAdmin,
+  async (req, res) => {
+    const { id } = req.params;
+    const { basePricePLN, minIncrementPLN, startsAt, endsAt } = req.body ?? {};
+    if (!basePricePLN || !minIncrementPLN || !startsAt || !endsAt)
+      return res.status(400).json({ message: "Missing fields" });
+
+    const old = await prisma.auction.findUnique({
+      where: { id },
+      include: { images: true },
+    });
+    if (!old) return res.status(404).json({ message: "Not found" });
+
+    const auction = await prisma.auction.create({
+      data: {
+        title: old.title,
+        description: old.description,
+        basePrice: toGrosze(basePricePLN),
+        minIncrement: toGrosze(minIncrementPLN),
+        reservePrice: old.reservePrice,
+        status: "ACTIVE",
+        startsAt: new Date(startsAt),
+        endsAt: new Date(endsAt),
+        sellerId: old.sellerId,
+        images: {
+          create: old.images.map((img) => ({
+            url: img.url,
+            position: img.position,
+          })),
+        },
+      },
+    });
+
+    res.json(auction);
+  }
+);
+
 // --------- LEKKI STATUS (polling do odświeżania ofert) ----------
 auctionsRouter.get("/:id/top", async (req, res) => {
   const a = await prisma.auction.findUnique({
