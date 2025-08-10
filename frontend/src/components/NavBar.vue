@@ -17,10 +17,8 @@ function logout() {
 
 <template>
   <header class="topbar">
-    <router-link to="/" class="brand" aria-label="Altkom Software">
-      <span class="logo-alt">alt</span>
-      <span class="logo-box"><span class="logo-k">kom</span></span>
-      <span class="logo-om"> software</span>
+    <router-link to="/" class="brand" aria-label="Auction Platform">
+      Auction Platform
     </router-link>
     <nav class="nav-links">
       <router-link to="/">Start</router-link>
