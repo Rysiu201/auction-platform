@@ -7,8 +7,8 @@
       Witamy na Aukcji Sprzętu
       <span class="brand inline-brand">
         <span class="logo-alt">alt</span>
-        <span class="logo-box"><span class="logo-k">k</span></span>
-        <span class="logo-om">om software</span>
+        <span class="logo-box"><span class="logo-k">kom</span></span>
+        <span class="logo-om">software</span>
       </span>
     </h1>
     <p class="hero-subtitle">
