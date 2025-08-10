@@ -76,13 +76,15 @@ async function submitRelist() {
   <section class="admin-dashboard">
     <h1>Panel administracyjny</h1>
     <div class="admin-layout">
-      <aside class="admin-nav">
-        <ul>
-          <li><router-link to="/admin/create">Dodaj Aukcję</router-link></li>
-          <li><router-link to="/admin">Aukcje</router-link></li>
-          <li><router-link to="/admin/settings">Ustawienia</router-link></li>
-        </ul>
-      </aside>
+      <section class="admin navbar">
+        <aside class="admin-nav">
+          <ul>
+            <li><router-link to="/admin/create">Dodaj Aukcję</router-link></li>
+            <li><router-link to="/admin">Aukcje</router-link></li>
+            <li><router-link to="/admin/settings">Ustawienia</router-link></li>
+          </ul>
+        </aside>
+      </section>
       <main class="admin-content">
         <p v-if="error" style="color:red">{{ error }}</p>
         <div v-else-if="overview" class="auction-overview">
@@ -159,4 +161,10 @@ async function submitRelist() {
     </div>
   </section>
 </template>
+
+<style scoped>
+.admin-navbar { padding:40px 20px; text-align:left; }
+
+.admin-nav { padding:40px 20px; text-align:left; }
+</style>
 

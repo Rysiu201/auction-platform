@@ -319,7 +319,7 @@ button:focus-visible {
   background: #f0f0f0;
   padding: 20px;
   border-right: 1px solid #d6d6d6;
-  min-height: 10vh;
+  height: 50vh;
   box-sizing: border-box;
 }
 

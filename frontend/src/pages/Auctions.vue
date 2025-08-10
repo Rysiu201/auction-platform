@@ -54,6 +54,7 @@ function currentPrice(a: Auction) {
 </script>
 
 <template>
+  <section class="page-section">
   <h1>Aktywne aukcje</h1>
 
   <p v-if="loading">Ładowanie…</p>
@@ -90,4 +91,9 @@ function currentPrice(a: Auction) {
   </div>
 
   <p v-else-if="!loading && !auctions.length">Brak aktywnych aukcji.</p>
+  </section>
 </template>
+
+<style scoped>
+.page-section { padding:40px 20px; text-align:center; }
+</style>
