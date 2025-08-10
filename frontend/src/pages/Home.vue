@@ -36,14 +36,14 @@ const targetMs = computed(() => {
   return iso ? new Date(iso).getTime() : null;
 });
 
-const nowMs = () => Date.now();
-const msLeft = computed(() => {
-  if (!targetMs.value) return 0;
-  return Math.max(0, targetMs.value - nowMs());
-});
+const msLeft = ref(0);
+const hasSchedule = computed(() => targetMs.value !== null);
+const hasCountdown = computed(() => hasSchedule.value && msLeft.value > 0);
+const auctionsActive = computed(() => hasSchedule.value && msLeft.value <= 0);
 
-const hasCountdown = computed(() => !!targetMs.value && msLeft.value > 0);
-const auctionsActive = computed(() => !hasCountdown.value);
+function updateMsLeft() {
+  msLeft.value = targetMs.value ? Math.max(0, targetMs.value - Date.now()) : 0;
+}
 
 function renderFromMs(ms: number) {
   const total = Math.floor(ms / 1000);
@@ -88,14 +88,15 @@ function flip(unitIdx: number, pos: number, nextDigit: string) {
 
 function startCountdownToTarget() {
   stopCountdown();
+  updateMsLeft();
   // pierwsze wyrenderowanie
   renderFromMs(msLeft.value);
 
   // korygowany interwał – liczymy za każdym razem od nowa
   intervalId = window.setInterval(() => {
-    const left = msLeft.value;
-    renderFromMs(left);
-    if (left <= 0) stopCountdown();
+    updateMsLeft();
+    renderFromMs(msLeft.value);
+    if (msLeft.value <= 0) stopCountdown();
   }, 1000);
 }
 
@@ -119,6 +120,8 @@ onMounted(async () => {
   } catch { settings.value = { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: null }; }
 
 });
+
+watch(targetMs, updateMsLeft, { immediate: true });
 
 watch(hasCountdown, async (val) => {
   if (val) {
@@ -166,12 +169,12 @@ function currentPrice(a: Auction) {
 
     <div class="next-auctions">Następna Pula Aukcji:</div>
 
-    <!-- Gdy brak terminu -->
-    <p v-if="!hasCountdown" class="no-schedule">
-      Obecnie nie ma wyznaczonego terminu przyszłych aukcji.
+    <p v-if="!hasSchedule" class="no-schedule">
+      Termin nie został jeszcze wyznaczony.
     </p>
-
-    <!-- Gdy odliczanie trwa -->
+    <p v-else-if="auctionsActive" class="no-schedule">
+      Aktualnie trwa aukcja.
+    </p>
     <div v-else class="flip-clock" role="timer" aria-live="polite">
       <div class="flip-unit" v-for="unit in timeUnits" :key="unit.label">
         <div class="flip-card" v-for="(digit, i) in unit.digits" :key="i">
@@ -217,7 +220,7 @@ function currentPrice(a: Auction) {
   --radius:14px;
   --font:clamp(38px,6vw,78px);
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  --display:flex; gap:clamp(18px,2.6vw,28px); align-items:flex-end; user-select:none;
+  display:flex; gap:clamp(18px,2.6vw,28px); align-items:flex-end; user-select:none;
 }
 .flip-unit{ display:flex; flex-direction:column; align-items:center; }
 .flip-unit .label{ margin-top:10px; font-size:13px; color:#6b7c8a; letter-spacing:.4px; }
