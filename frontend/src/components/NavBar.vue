@@ -22,7 +22,7 @@ function logout() {
       <span class="logo-om">software</span>
     </router-link>
     <nav class="nav-links">
-      <router-link to="/">Start</router-link>
+      <router-link to="/">Strona Główna</router-link>
       <router-link to="/auctions">Aukcje</router-link>
       <router-link to="/info">Informacje</router-link>
       <router-link to="/contact">Kontakt</router-link>
