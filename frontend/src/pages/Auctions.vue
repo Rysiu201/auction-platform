@@ -47,6 +47,14 @@ const conditionLabel: Record<string, string> = {
   DO_NAPRAWY: 'Do naprawy',
 };
 
+const conditionColor: Record<string, string> = {
+  DO_NAPRAWY: '#FFA500',
+  USZKODZONY: '#FF0000',
+  DOBRY: '#FFFF00',
+  BARDZO_DOBRY: '#00FFFF',
+  NOWY: '#008000',
+};
+
 function currentPrice(a: Auction) {
   const top = a.bids.length ? Math.max(...a.bids.map((b) => b.amount)) : 0;
   return fmtPrice(Math.max(a.basePrice, top));
@@ -78,7 +86,9 @@ function currentPrice(a: Auction) {
             alt=""
             class="auction-image"
           />
-          <span class="condition-badge">{{ conditionLabel[a.condition] || a.condition }}</span>
+          <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
+            {{ conditionLabel[a.condition] || a.condition }}
+          </span>
         </div>
         <div class="auction-info">
           <h3 class="auction-title">{{ a.title }}</h3>

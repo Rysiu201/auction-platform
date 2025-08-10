@@ -143,8 +143,14 @@ button:focus-visible {
 
 .auction-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
+}
+
+@media (max-width: 1000px) {
+  .auction-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
 }
 .auction-link {
   text-decoration: none;
