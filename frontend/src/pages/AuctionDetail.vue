@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import { api } from "@/api";
 
@@ -9,10 +9,11 @@ const id = route.params.id as string;
 const backend = import.meta.env.VITE_BACKEND_URL as string;
 
 const auction = ref<any>(null);
-const topAmount = ref(0);         // grosze
+const topAmount = ref(0); // grosze
 const myBidPLN = ref<string>("");
 const msg = ref<string | null>(null);
 const currentImg = ref(0);
+const timeLeft = ref(0);
 const conditionLabel: Record<string, string> = {
   NOWY: 'Nowy',
   BARDZO_DOBRY: 'Bardzo dobry',
@@ -21,7 +22,34 @@ const conditionLabel: Record<string, string> = {
   DO_NAPRAWY: 'Do naprawy',
 };
 
-let timer: number | undefined;
+const conditionColor: Record<string, string> = {
+  DO_NAPRAWY: '#FFA500',
+  USZKODZONY: '#FF0000',
+  DOBRY: '#FFFF00',
+  BARDZO_DOBRY: '#00FFFF',
+  NOWY: '#008000',
+};
+
+let pollTimer: number | undefined;
+let countTimer: number | undefined;
+
+const hasStarted = computed(() => {
+  return auction.value ? new Date(auction.value.startsAt).getTime() <= Date.now() : false;
+});
+
+const formattedTimeLeft = computed(() => {
+  const ms = timeLeft.value;
+  const total = Math.floor(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return `${h}h ${m}m ${s}s`;
+});
+
+function updateTimeLeft() {
+  if (!auction.value) return;
+  timeLeft.value = Math.max(0, new Date(auction.value.endsAt).getTime() - Date.now());
+}
 
 function toPLN(g: number) {
   return (g / 100).toFixed(2);
@@ -67,11 +95,14 @@ async function placeBid() {
 
 onMounted(async () => {
   await loadFull();
-  timer = window.setInterval(pollTop, 2000);
+  updateTimeLeft();
+  pollTimer = window.setInterval(pollTop, 2000);
+  countTimer = window.setInterval(updateTimeLeft, 1000);
 });
 
 onUnmounted(() => {
-  if (timer) window.clearInterval(timer);
+  if (pollTimer) window.clearInterval(pollTimer);
+  if (countTimer) window.clearInterval(countTimer);
 });
 </script>
 
@@ -96,23 +127,31 @@ onUnmounted(() => {
     </div>
     <div class="bid-panel">
       <h1 class="auction-title">{{ auction.title }}</h1>
-      <span class="detail-condition">{{ conditionLabel[auction.condition] || auction.condition }}</span>
+      <span class="detail-condition" :style="{ background: conditionColor[auction.condition] }">
+        {{ conditionLabel[auction.condition] || auction.condition }}
+      </span>
       <p class="auction-desc">{{ auction.description }}</p>
       <div class="price-box">
         <span class="label">Aktualna oferta</span>
         <div class="price">{{ toPLN(topAmount) }} PLN</div>
       </div>
-      <div class="timer">Kończy się: {{ new Date(auction.endsAt).toLocaleString() }}</div>
-      <div v-if="auction.status !== 'ENDED'" class="bid-form">
+      <div class="timer">Start: {{ new Date(auction.startsAt).toLocaleString() }}</div>
+      <div class="timer">Koniec: {{ new Date(auction.endsAt).toLocaleString() }}</div>
+      <div v-if="hasStarted && auction.status !== 'ENDED'" class="timer">Pozostało: {{ formattedTimeLeft }}</div>
+      <div v-if="auction.status !== 'ENDED' && hasStarted" class="bid-form">
         <input v-model="myBidPLN" type="number" step="0.01" placeholder="Twoja oferta (PLN)" />
         <button @click="placeBid">Licytuj</button>
         <p class="bid-hint">Min. przebicie: {{ toPLN(auction.minIncrement) }} PLN</p>
       </div>
-      <ul class="options">
-        <li v-if="auction.personalPickup">Odbiór osobisty</li>
-        <li v-if="auction.courierShipping">Wysyłka kurierem</li>
-        <li>Faktura: {{ auction.invoice ? 'możliwa' : 'brak' }}</li>
-      </ul>
+      <p v-else-if="auction.status !== 'ENDED'" class="not-started">Aukcja jeszcze się nie rozpoczęła.</p>
+      <div class="extra-info">
+        <h3>Dodatkowe Informacje</h3>
+        <ul class="options">
+          <li v-if="auction.personalPickup">Odbiór osobisty</li>
+          <li v-if="auction.courierShipping">Wysyłka kurierem</li>
+          <li>Faktura: {{ auction.invoice ? 'możliwa' : 'brak' }}</li>
+        </ul>
+      </div>
       <p v-if="msg" class="error">{{ msg }}</p>
     </div>
   </div>
@@ -175,7 +214,6 @@ onUnmounted(() => {
 }
 .detail-condition {
   align-self: flex-start;
-  background: #ff4f64;
   color: #fff;
   padding: 2px 8px;
   border-radius: 4px;
@@ -210,6 +248,18 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  color: #6b7280;
+}
+.extra-info {
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+.extra-info h3 {
+  margin: 0 0 8px;
+}
+.not-started {
   color: #6b7280;
 }
 .error {
