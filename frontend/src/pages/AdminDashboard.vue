@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { api } from '@/api';
 
 type Winner = { amount: number; user: { name: string } } | null;
@@ -10,6 +10,7 @@ type Auction = {
   startsAt: string;
   endsAt: string;
   winnerBid?: Winner;
+  bids?: { amount: number; user?: { name: string } }[];
 };
 type Overview = {
   active: Auction[];
@@ -36,6 +37,15 @@ function fmtPrice(p: number) {
   return (p / 100).toFixed(2) + ' PLN';
 }
 
+function timeLeft(a: Auction) {
+  const ms = new Date(a.endsAt).getTime() - now.value;
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return `${h}h ${m}m ${s}s`;
+}
+
 async function fetchOverview() {
   try {
     const { data } = await api.get('/auctions/admin/overview');
@@ -45,7 +55,20 @@ async function fetchOverview() {
   }
 }
 
-onMounted(fetchOverview);
+let timer: number | undefined;
+let nowInterval: number | undefined;
+const now = ref(Date.now());
+
+onMounted(() => {
+  fetchOverview();
+  timer = window.setInterval(fetchOverview, 5000);
+  nowInterval = window.setInterval(() => (now.value = Date.now()), 1000);
+});
+
+onUnmounted(() => {
+  if (timer) window.clearInterval(timer);
+  if (nowInterval) window.clearInterval(nowInterval);
+});
 
 function openRelist(a: Auction) {
   relistAuction.value = a;
@@ -92,12 +115,14 @@ async function submitRelist() {
             <h2>Aktywne</h2>
             <table>
               <thead>
-                <tr><th>Tytuł</th><th>Koniec</th></tr>
+                <tr><th>Tytuł</th><th>Cena</th><th>Zwycięzca</th><th>Pozostały czas</th></tr>
               </thead>
               <tbody>
                 <tr v-for="a in overview.active" :key="a.id">
                   <td>{{ a.title }}</td>
-                  <td>{{ fmtDate(a.endsAt) }}</td>
+                  <td>{{ fmtPrice(Math.max(a.basePrice, a.bids?.[0]?.amount || 0)) }}</td>
+                  <td>{{ a.bids?.[0]?.user?.name || '—' }}</td>
+                  <td>{{ timeLeft(a) }}</td>
                 </tr>
               </tbody>
             </table>

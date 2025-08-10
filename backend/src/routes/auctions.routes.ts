@@ -51,6 +51,13 @@ auctionsRouter.get(
     const active = await prisma.auction.findMany({
       where: { status: "ACTIVE" },
       orderBy: { endsAt: "asc" },
+      include: {
+        bids: {
+          orderBy: { amount: "desc" },
+          take: 1,
+          include: { user: { select: { id: true, name: true } } },
+        },
+      },
     });
 
     const noBids = ended.filter((a) => a.bids.length === 0);
