@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, computed } from "vue";
+import { onMounted, onBeforeUnmount, ref, computed, watch, nextTick } from "vue";
 import { api } from "@/api";
 
 const backend = import.meta.env.VITE_BACKEND_URL as string;
@@ -43,6 +43,7 @@ const msLeft = computed(() => {
 });
 
 const hasCountdown = computed(() => !!targetMs.value && msLeft.value > 0);
+const auctionsActive = computed(() => !hasCountdown.value);
 
 function renderFromMs(ms: number) {
   const total = Math.floor(ms / 1000);
@@ -117,7 +118,15 @@ onMounted(async () => {
     settings.value = data;
   } catch { settings.value = { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: null }; }
 
-  if (hasCountdown.value) startCountdownToTarget();
+});
+
+watch(hasCountdown, async (val) => {
+  if (val) {
+    await nextTick();
+    startCountdownToTarget();
+  } else {
+    stopCountdown();
+  }
 });
 
 onBeforeUnmount(() => stopCountdown());
@@ -145,7 +154,7 @@ function currentPrice(a: Auction) {
       Dołącz do naszych licytacji firmowego sprzętu komputerowego – głównie laptopów używanych w różnym stanie technicznym. Każdy przedmiot ma indywidualny opis…
     </p>
 
-    <div v-if="latest.length" class="latest-auctions">
+    <div v-if="auctionsActive && latest.length" class="latest-auctions">
       <article v-for="a in latest" :key="a.id" class="latest-card">
         <img v-if="a.images?.[0]" :src="`${backend}${a.images[0].url}`" alt="" class="latest-image" />
         <div class="latest-info">
@@ -175,7 +184,7 @@ function currentPrice(a: Auction) {
       </div>
     </div>
 
-    <router-link to="/auctions" class="cta-button">Zobacz Aktualne Aukcje</router-link>
+    <router-link v-if="auctionsActive && latest.length" to="/auctions" class="cta-button">Zobacz Aktualne Aukcje</router-link>
   </section>
 </template>
 
