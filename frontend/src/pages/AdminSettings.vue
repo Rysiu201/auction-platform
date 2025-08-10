@@ -3,6 +3,7 @@ import { ref } from 'vue';
 
 const maxActiveAuctions = ref('');
 const maxWonAuctions = ref('');
+const nextauction = ref('');
 </script>
 
 <template>
@@ -24,6 +25,9 @@ const maxWonAuctions = ref('');
           </label>
           <label>Maks. wygranych aukcji:
             <input v-model="maxWonAuctions" type="number" />
+          </label>
+          <label>Data Rozpoczęcia Kolejnych Aukcji:
+            <input v-model="nextauction" type="number" />
           </label>
         </form>
       </main>
