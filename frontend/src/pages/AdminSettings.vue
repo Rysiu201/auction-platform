@@ -210,7 +210,7 @@ onMounted(load);
 .form label{ display:grid; gap:6px; color:#334; font-weight:600; }
 input{ padding:10px 12px; border:1px solid #c9d3dd; border-radius:8px; }
 .actions{ display:flex; gap:10px; margin-top:6px; }
-.btn{ padding:10px 16px; border-radius:8px; border:1px solid #c9d3dd; background:#f7f9fb; cursor:pointer; }
+.btn{ padding:10px 16px; border-radius:8px; border:1px solid #c9d3dd; background:#0774e2; cursor:pointer; }
 .btn:disabled{ opacity:.6; cursor:not-allowed; }
 .btn.primary{ background:#0059b3; border-color:#0059b3; color:#fff; }
 .msg{ margin:4px 0 0; font-weight:600; }
