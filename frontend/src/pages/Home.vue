@@ -210,15 +210,15 @@ function currentPrice(a: Auction) {
 .cta-button:hover{ background:#0066cc; transform:translateY(-1px); }
 
 /* ================= FLIP CLOCK (pełny 3D) ================= */
-:root{
+.flip-clock{
+  /* zmienne muszą być zdefiniowane na elemencie w zasięgu, nie w :root ze style scoped */
   --digit-w:clamp(52px,6.2vw,88px);
   --digit-h:clamp(76px,9vw,132px);
   --radius:14px;
   --font:clamp(38px,6vw,78px);
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --display:flex; gap:clamp(18px,2.6vw,28px); align-items:flex-end; user-select:none;
 }
-
-.flip-clock{ display:flex; gap:clamp(18px,2.6vw,28px); align-items:flex-end; user-select:none; }
 .flip-unit{ display:flex; flex-direction:column; align-items:center; }
 .flip-unit .label{ margin-top:10px; font-size:13px; color:#6b7c8a; letter-spacing:.4px; }
 
