@@ -78,7 +78,9 @@ async function submitRelist() {
     <div class="admin-layout">
       <aside class="admin-nav">
         <ul>
-          <li class="active"><router-link to="/admin">Aukcje</router-link></li>
+          <li><router-link to="/admin/create">Dodaj Aukcję</router-link></li>
+          <li><router-link to="/admin">Aukcje</router-link></li>
+          <li><router-link to="/admin/settings">Ustawienia</router-link></li>
         </ul>
       </aside>
       <main class="admin-content">
