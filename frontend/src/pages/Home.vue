@@ -3,7 +3,7 @@
 
 <template>
   <section class="home-hero">
-    <h1 class="typewriter">
+    <h1 class="welcome">
       Witamy na Aukcji Sprzętu
       <span class="brand inline-brand">
         <span class="logo-alt">alt</span>
@@ -29,19 +29,11 @@
 }
 
 .inline-brand {
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
-.typewriter {
-  overflow: hidden;
-  white-space: nowrap;
-  border-right: 0.15em solid #ff4f64;
-  animation: typing 6s steps(60, end);
-}
-
-@keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
+.welcome {
+  white-space: normal;
 }
 
 .hero-subtitle {
