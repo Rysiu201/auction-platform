@@ -12,6 +12,10 @@ const extraImages = ref<File[]>([]);
 const mainPreview = ref<string>('');
 const extraPreviews = ref<string[]>([]);
 const ok = ref<string|null>(null); const error = ref<string|null>(null); const loading = ref(false);
+const condition = ref('DOBRY');
+const personalPickup = ref(false);
+const courierShipping = ref(false);
+const invoice = ref(false);
 
 function toISO(dt: string) { return dt ? new Date(dt).toISOString() : ""; }
 
@@ -24,6 +28,10 @@ async function submit() {
     fd.append("basePricePLN", basePricePLN.value);
     fd.append("minIncrementPLN", minIncrementPLN.value);
     if (reservePricePLN.value) fd.append("reservePricePLN", reservePricePLN.value);
+    fd.append("condition", condition.value);
+    fd.append("personalPickup", String(personalPickup.value));
+    fd.append("courierShipping", String(courierShipping.value));
+    fd.append("invoice", String(invoice.value));
     fd.append("startsAt", toISO(startsAt.value));
     fd.append("endsAt", toISO(endsAt.value));
     if (mainImage.value) fd.append("images", mainImage.value);
@@ -77,6 +85,18 @@ function onExtras(e: Event) {
           <label>Data Rozpoczęcia: <input v-model="startsAt" type="datetime-local" required /></label>
           <label>Data Zakończenia: <input v-model="endsAt" type="datetime-local" required /></label>
         </div>
+        <label>Stan sprzętu:
+          <select v-model="condition">
+            <option value="NOWY">Nowy</option>
+            <option value="BARDZO_DOBRY">Bardzo dobry</option>
+            <option value="DOBRY">Dobry</option>
+            <option value="USZKODZONY">Uszkodzony</option>
+            <option value="DO_NAPRAWY">Do naprawy</option>
+          </select>
+        </label>
+        <label><input type="checkbox" v-model="personalPickup" /> Odbiór osobisty</label>
+        <label><input type="checkbox" v-model="courierShipping" /> Wysyłka kurierem</label>
+        <label><input type="checkbox" v-model="invoice" /> Faktura dostępna</label>
         <label>Główne zdjęcie: <input type="file" @change="onMain" /></label>
         <div class="preview-images" v-if="mainPreview">
           <img :src="mainPreview" />

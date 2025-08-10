@@ -20,7 +20,7 @@ function toGrosze(v: string | number | undefined) {
 auctionsRouter.get("/", async (_req, res) => {
   const auctions = await prisma.auction.findMany({
     where: { status: "ACTIVE" },
-    include: { images: true },
+    include: { images: true, bids: true },
     orderBy: { endsAt: "asc" },
   });
   res.json(auctions);
@@ -81,6 +81,10 @@ auctionsRouter.post(
       basePricePLN,
       minIncrementPLN,
       reservePricePLN,
+      condition,
+      personalPickup,
+      courierShipping,
+      invoice,
       startsAt,
       endsAt,
     } = req.body ?? {};
@@ -91,7 +95,8 @@ auctionsRouter.post(
       !basePricePLN ||
       !minIncrementPLN ||
       !startsAt ||
-      !endsAt
+      !endsAt ||
+      !condition
     ) {
       return res.status(400).json({ message: "Missing fields" });
     }
@@ -109,6 +114,10 @@ auctionsRouter.post(
         basePrice: toGrosze(basePricePLN),
         minIncrement: toGrosze(minIncrementPLN),
         reservePrice: reservePricePLN ? toGrosze(reservePricePLN) : null,
+        condition,
+        personalPickup: personalPickup === "true",
+        courierShipping: courierShipping === "true",
+        invoice: invoice === "true",
         status: "ACTIVE",
         startsAt: new Date(startsAt),
         endsAt: new Date(endsAt),
@@ -145,6 +154,10 @@ auctionsRouter.post(
         basePrice: toGrosze(basePricePLN),
         minIncrement: toGrosze(minIncrementPLN),
         reservePrice: old.reservePrice,
+        condition: old.condition,
+        personalPickup: old.personalPickup,
+        courierShipping: old.courierShipping,
+        invoice: old.invoice,
         status: "ACTIVE",
         startsAt: new Date(startsAt),
         endsAt: new Date(endsAt),
