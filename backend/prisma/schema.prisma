@@ -19,6 +19,15 @@ enum AuctionStatus {
   CANCELED
 }
 
+// Stan sprzętu wystawionego na aukcję
+enum ItemCondition {
+  NOWY
+  BARDZO_DOBRY
+  DOBRY
+  USZKODZONY
+  DO_NAPRAWY
+}
+
 enum LogAction {
   USER_REGISTER
   USER_LOGIN
@@ -47,6 +56,10 @@ model Auction {
   basePrice    Int
   minIncrement Int
   reservePrice Int?
+  condition    ItemCondition  @default(DOBRY)
+  personalPickup  Boolean     @default(false)
+  courierShipping Boolean     @default(false)
+  invoice      Boolean        @default(false)
   status       AuctionStatus  @default(DRAFT)
   startsAt     DateTime
   endsAt       DateTime

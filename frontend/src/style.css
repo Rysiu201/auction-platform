@@ -73,7 +73,7 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   background: #ff4f64;
-  margin: 0 2px;
+  margin: 0 1px;
   padding: 0 4px;
 }
 .logo-k {
@@ -152,27 +152,63 @@ button:focus-visible {
   color: inherit;
 }
 .auction-card {
-  border: 1px solid #eee;
-  border-radius: 8px;
-  padding: 12px;
-  transition: 0.15s box-shadow;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
 }
 .auction-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+.image-wrapper {
+  position: relative;
 }
 .auction-image {
   width: 100%;
-  height: 160px;
+  height: 180px;
   object-fit: cover;
-  border-radius: 6px;
+  display: block;
 }
-.auction-card h3 {
-  margin: 8px 0 4px;
+.condition-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #ff4f64;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
 }
-.auction-card p {
-  color: #555;
+.auction-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.auction-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+.auction-price {
+  font-size: 18px;
+  font-weight: 700;
+}
+.auction-offers {
   font-size: 14px;
-  min-height: 40px;
+  color: #555;
+}
+.auction-end {
+  background: #e53935;
+  color: #fff;
+  padding: 4px 8px;
+  text-align: center;
+  font-size: 14px;
 }
 
 .form {
@@ -284,6 +320,8 @@ button:focus-visible {
   background: #f0f0f0;
   padding: 20px;
   border-right: 1px solid #d6d6d6;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
 .admin-nav ul {
