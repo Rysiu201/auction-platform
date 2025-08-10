@@ -12,10 +12,10 @@ const prisma = new PrismaClient();
 
   await prisma.user.upsert({
     where: { email },
-    update: { role: "ADMIN" },
+    update: { role: "ADMIN", passwordHash },
     create: { email, name, passwordHash, role: "ADMIN" }
   });
 
-  console.log("Admin ensured:", email);
+  console.log("Admin ensured:", email, "password:", password);
   await prisma.$disconnect();
 })();
