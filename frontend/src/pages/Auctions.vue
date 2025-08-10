@@ -35,7 +35,7 @@ function fmtDate(s: string) {
 </script>
 
 <template>
-  <h1>Aktywne aukcje</h1>
+  <h1>Aktualne Aukcje</h1>
 
   <p v-if="loading">Ładowanie…</p>
   <p v-if="error" style="color:red">{{ error }}</p>
