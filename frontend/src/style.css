@@ -73,7 +73,7 @@ button:focus-visible {
   justify-content: center;
   background: #ff4f64;
   margin: 0 1px;
-  padding: 0 -1px
+  padding: 0 -1px;
 }
 .logo-k {
   color: #ffffff;
@@ -319,7 +319,7 @@ button:focus-visible {
   background: #f0f0f0;
   padding: 20px;
   border-right: 1px solid #d6d6d6;
-  min-height: 100vh;
+  min-height: 10vh;
   box-sizing: border-box;
 }
 
