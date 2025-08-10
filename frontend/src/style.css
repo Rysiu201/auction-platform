@@ -53,11 +53,32 @@ button:focus-visible {
   background: #f5f5f5;
 }
 .brand {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  background: #1c1c1c;
+  padding: 4px 8px;
+  border-radius: 4px;
   font-weight: 700;
   font-size: 1.1rem;
+  color: #ff4f64;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: lowercase;
+}
+.logo-alt,
+.logo-om {
+  color: #ff4f64;
+}
+.logo-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ff4f64;
+  margin: 0 1px;
+  padding: 0 4px;
+}
+.logo-k {
   color: #1c1c1c;
-  text-decoration: none;
+  font-weight: 700;
 }
 .nav-links {
   justify-self: center;
