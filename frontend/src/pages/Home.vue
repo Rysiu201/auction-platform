@@ -66,6 +66,10 @@ function currentPrice(a: Auction) {
       </article>
     </div>
 
+    <div class = "next-auctions">
+      Następna Pula Aukcji zacznie się za:
+      <div class="next-auctions-time">13:52 minut</div>
+    </div>
     <router-link to="/auctions" class="cta-button">Zobacz Aktualne Aukcje</router-link>
   </section>
 </template>
