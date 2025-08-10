@@ -17,11 +17,18 @@ function toGrosze(v: string | number | undefined) {
 }
 
 // ----------------------------- LISTA -----------------------------
-auctionsRouter.get("/", async (_req, res) => {
+auctionsRouter.get("/", async (req, res) => {
+  const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : undefined;
+  const orderBy =
+    req.query.sort === "latest"
+      ? { createdAt: "desc" as const }
+      : { endsAt: "asc" as const };
+
   const auctions = await prisma.auction.findMany({
     where: { status: "ACTIVE" },
     include: { images: true, bids: true },
-    orderBy: { endsAt: "asc" },
+    orderBy,
+    ...(limit ? { take: limit } : {}),
   });
   res.json(auctions);
 });

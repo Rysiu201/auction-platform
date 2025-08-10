@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "prisma:generate": "prisma generate",
-    "dev": "npm run prisma:generate && ts-node-dev --respawn src/server.ts",
-    "build": "npm run prisma:generate && tsc -p .",
+    "prisma:push": "prisma db push",
+    "dev": "npm run prisma:push && ts-node-dev --respawn src/server.ts",
+    "build": "npm run prisma:push && tsc -p .",
     "start": "node dist/server.js",
-    "seed:admin": "ts-node ./scripts/seed-admin.ts",
-    "make:admin": "ts-node ./scripts/make-admin.ts"
+    "seed:admin": "npm run prisma:push && ts-node ./scripts/seed-admin.ts",
+    "make:admin": "npm run prisma:push && ts-node ./scripts/make-admin.ts"
   },
   "keywords": [],
   "author": "",
