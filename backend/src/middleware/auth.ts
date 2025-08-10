@@ -1,13 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
+
 export type JwtUser = { id: string; role: "USER" | "ADMIN"; name: string };
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies?.token;
   if (!token) return res.status(401).json({ message: "Unauthorized" });
   try {
-    const user = jwt.verify(token, process.env.JWT_SECRET!) as JwtUser;
+    const user = jwt.verify(token, JWT_SECRET) as JwtUser;
     (req as any).user = user;
     next();
   } catch {

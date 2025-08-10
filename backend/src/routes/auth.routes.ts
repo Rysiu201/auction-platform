@@ -6,6 +6,7 @@ import ldap from "ldapjs";
 import { promisify } from "util";
 
 export const authRouter = Router();
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
 authRouter.post("/register", async (req, res) => {
   const { email, password, name } = req.body ?? {};
@@ -40,7 +41,7 @@ authRouter.post("/login", async (req, res) => {
 
   const token = jwt.sign(
     { id: user.id, role: user.role, name: user.name },
-    process.env.JWT_SECRET!,
+    JWT_SECRET,
     { expiresIn: "7d" }
   );
 
@@ -56,7 +57,7 @@ authRouter.post("/sso", async (_req, res) => {
   }
   const token = jwt.sign(
     { id: user.id, role: user.role, name: user.name },
-    process.env.JWT_SECRET!,
+    JWT_SECRET,
     { expiresIn: "7d" }
   );
   res.cookie("token", token, { httpOnly: true, sameSite: "lax" });
@@ -93,7 +94,7 @@ authRouter.post("/ldap", async (req, res) => {
 
   const token = jwt.sign(
     { id: user.id, role: user.role, name: user.name },
-    process.env.JWT_SECRET!,
+    JWT_SECRET,
     { expiresIn: "7d" }
   );
   res.cookie("token", token, { httpOnly: true, sameSite: "lax" });
