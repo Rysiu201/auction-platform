@@ -6,6 +6,7 @@ import fs from "fs";
 import { prisma } from "./prisma";
 import { authRouter } from "./routes/auth.routes";
 import { auctionsRouter } from "./routes/auctions.routes";
+import { settingsRouter } from "./routes/settings.routes";
 
 const app = express();
 
@@ -35,5 +36,6 @@ app.get("/api/db-ok", async (_req, res) => {
 // Podpięcie routerów
 app.use("/api/auth", authRouter);
 app.use("/api/auctions", auctionsRouter);
+app.use("/api/settings", settingsRouter);
 
 export default app;

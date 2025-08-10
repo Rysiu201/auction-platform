@@ -100,3 +100,10 @@ model AuditLog {
   meta      Json
   createdAt DateTime  @default(now())
 }
+
+model Settings {
+  id                Int       @id @default(1)
+  maxActiveAuctions Int       @default(0)
+  maxWonAuctions    Int       @default(0)
+  nextAuctionIso    DateTime?
+}
