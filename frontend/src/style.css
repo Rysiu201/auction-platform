@@ -126,6 +126,16 @@ button:focus-visible {
   padding: 0.3em 0.6em;
 }
 
+.logout-btn {
+  background: #cc0000;
+  border-color: #cc0000;
+}
+
+.logout-btn:hover {
+  background: #ff3333;
+  border-color: #ff3333;
+}
+
 .container {
   max-width: 960px;
   margin: 20px auto;
@@ -284,20 +294,19 @@ button:focus-visible {
 
 .admin-nav li {
   margin-bottom: 10px;
+}
+
+.admin-nav a {
+  display: block;
   padding: 8px;
   border-radius: 4px;
-  cursor: pointer;
-}
-
-.admin-nav li.active {
-  background: #0059b3;
-  color: #fff;
-}
-
-.admin-nav li a {
   color: inherit;
   text-decoration: none;
-  display: block;
+}
+
+.admin-nav a.router-link-active {
+  background: #0059b3;
+  color: #fff;
 }
 
 .auction-overview {
