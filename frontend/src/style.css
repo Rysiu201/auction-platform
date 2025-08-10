@@ -55,9 +55,6 @@ button:focus-visible {
 .brand {
   display: inline-flex;
   align-items: center;
-  background: #1c1c1c;
-  padding: 4px 8px;
-  border-radius: 4px;
   font-weight: 700;
   font-size: 1.1rem;
   color: #ff4f64;
@@ -68,17 +65,15 @@ button:focus-visible {
 .logo-om {
   color: #ff4f64;
 }
-.logo-box {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #ff4f64;
-  margin: 0 2px;
-  padding: 0 4px;
+.logo-om {
+  margin-left: 4px;
 }
-.logo-k {
-  color: #1c1c1c;
-  font-weight: 700;
+.logo-kom {
+  background: #ff4f64;
+  color: #fff;
+  margin-left: 2px;
+  padding: 0 4px;
+  border-radius: 4px;
 }
 .nav-links {
   justify-self: center;
@@ -124,6 +119,16 @@ button:focus-visible {
 .btn.small {
   font-size: 0.8rem;
   padding: 0.3em 0.6em;
+}
+
+.logout-btn {
+  background: #cc0000;
+  border-color: #cc0000;
+}
+
+.logout-btn:hover {
+  background: #ff3333;
+  border-color: #ff3333;
 }
 
 .container {
@@ -267,6 +272,11 @@ button:focus-visible {
 
 .admin-layout {
   display: flex;
+  width: 100%;
+}
+
+.admin-dashboard {
+  margin: 0;
 }
 
 .admin-nav {
@@ -274,6 +284,7 @@ button:focus-visible {
   background: #f0f0f0;
   padding: 20px;
   border-right: 1px solid #d6d6d6;
+  margin-right: 40px;
 }
 
 .admin-nav ul {
@@ -284,20 +295,19 @@ button:focus-visible {
 
 .admin-nav li {
   margin-bottom: 10px;
+}
+
+.admin-nav a {
+  display: block;
   padding: 8px;
   border-radius: 4px;
-  cursor: pointer;
-}
-
-.admin-nav li.active {
-  background: #0059b3;
-  color: #fff;
-}
-
-.admin-nav li a {
   color: inherit;
   text-decoration: none;
-  display: block;
+}
+
+.admin-nav a.router-link-active {
+  background: #0059b3;
+  color: #fff;
 }
 
 .auction-overview {

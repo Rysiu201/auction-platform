@@ -8,7 +8,7 @@ const title = ref(""); const description = ref("");
 const basePricePLN = ref(""); const minIncrementPLN = ref("");
 const reservePricePLN = ref(""); const startsAt = ref(""); const endsAt = ref("");
 const mainImage = ref<File|null>(null);
-const extraImages = ref<FileList|null>(null);
+const extraImages = ref<File[]>([]);
 const mainPreview = ref<string>('');
 const extraPreviews = ref<string[]>([]);
 const ok = ref<string|null>(null); const error = ref<string|null>(null); const loading = ref(false);
@@ -27,7 +27,7 @@ async function submit() {
     fd.append("startsAt", toISO(startsAt.value));
     fd.append("endsAt", toISO(endsAt.value));
     if (mainImage.value) fd.append("images", mainImage.value);
-    if (extraImages.value) Array.from(extraImages.value).forEach(f => fd.append("images", f));
+    extraImages.value.forEach(f => fd.append("images", f));
 
     const { data } = await api.post("/auctions", fd);
     ok.value = `Utworzono: ${data.title}`; setTimeout(() => router.push("/"), 700);
@@ -43,17 +43,29 @@ function onMain(e: Event) {
 }
 
 function onExtras(e: Event) {
-  const files = (e.target as HTMLInputElement).files;
-  extraImages.value = files;
-  extraPreviews.value = files ? Array.from(files).map(f => URL.createObjectURL(f)) : [];
+  const files = Array.from((e.target as HTMLInputElement).files || []);
+  extraImages.value.push(...files);
+  extraPreviews.value.push(...files.map(f => URL.createObjectURL(f)));
+  (e.target as HTMLInputElement).value = '';
 }
 </script>
 
 <template>
-  <div class="create-auction-wrapper">
-    <div class="create-auction-card">
-      <h1>Nowa aukcja</h1>
-      <form @submit.prevent="submit" class="form">
+  <section class="admin-dashboard">
+    <h1>Panel administracyjny</h1>
+    <div class="admin-layout">
+      <aside class="admin-nav">
+        <ul>
+          <li><router-link to="/admin/create">Dodaj Aukcję</router-link></li>
+          <li><router-link to="/admin/auctions">Aukcje</router-link></li>
+          <li><router-link to="/admin/settings">Ustawienia</router-link></li>
+        </ul>
+      </aside>
+      <main class="admin-content">
+        <div class="create-auction-wrapper">
+          <div class="create-auction-card">
+            <h2>Nowa aukcja</h2>
+            <form @submit.prevent="submit" class="form">
         <input v-model="title" placeholder="Tytuł" required />
         <textarea v-model="description" placeholder="Opis" rows="4" required />
         <div class="form-row">
@@ -76,7 +88,10 @@ function onExtras(e: Event) {
         <button :disabled="loading" type="submit">Utwórz aukcję</button>
         <p v-if="ok" style="color:green">{{ ok }}</p>
         <p v-if="error" style="color:red">{{ error }}</p>
-      </form>
+            </form>
+          </div>
+        </div>
+      </main>
     </div>
-  </div>
+  </section>
 </template>

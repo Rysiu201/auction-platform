@@ -78,7 +78,9 @@ async function submitRelist() {
     <div class="admin-layout">
       <aside class="admin-nav">
         <ul>
-          <li class="active"><router-link to="/admin">Aukcje</router-link></li>
+          <li><router-link to="/admin/create">Dodaj Aukcję</router-link></li>
+          <li><router-link to="/admin/auctions">Aukcje</router-link></li>
+          <li><router-link to="/admin/settings">Ustawienia</router-link></li>
         </ul>
       </aside>
       <main class="admin-content">
@@ -88,12 +90,21 @@ async function submitRelist() {
             <h2>Aktywne</h2>
             <table>
               <thead>
-                <tr><th>Tytuł</th><th>Koniec</th></tr>
+                <tr>
+                  <th>Tytuł</th>
+                  <th>Wygrywający</th>
+                  <th>Zakończenie</th>
+                  <th>Kwota startowa</th>
+                  <th>Kwota obecna</th>
+                </tr>
               </thead>
               <tbody>
                 <tr v-for="a in overview.active" :key="a.id">
                   <td>{{ a.title }}</td>
+                  <td>{{ a.winnerBid?.user.name || '—' }}</td>
                   <td>{{ fmtDate(a.endsAt) }}</td>
+                  <td>{{ fmtPrice(a.basePrice) }}</td>
+                  <td>{{ fmtPrice(a.winnerBid?.amount || a.basePrice) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -102,13 +113,19 @@ async function submitRelist() {
             <h2>Zakończone</h2>
             <table>
               <thead>
-                <tr><th>Tytuł</th><th>Zwycięzca</th><th>Kwota</th></tr>
+                <tr>
+                  <th>Tytuł</th>
+                  <th>Zwycięzca</th>
+                  <th>Kwota</th>
+                  <th>Zakończenie</th>
+                </tr>
               </thead>
               <tbody>
                 <tr v-for="a in overview.ended" :key="a.id">
                   <td>{{ a.title }}</td>
                   <td>{{ a.winnerBid?.user.name || '—' }}</td>
                   <td>{{ fmtPrice(a.winnerBid?.amount || 0) }}</td>
+                  <td>{{ fmtDate(a.endsAt) }}</td>
                 </tr>
               </tbody>
             </table>
