@@ -4,7 +4,7 @@
 <template>
   <section class="page-section">
     <h1>Kontakt</h1>
-    <p>Napisz do nas: <a href="mailto:kontakt@altkom.pl">kontakt@altkom.pl</a></p>
+    <p>Napisz do nas: <a href="mailto:support@auction-platform.pl">support@auction-platform.pl</a></p>
   </section>
 </template>
 
