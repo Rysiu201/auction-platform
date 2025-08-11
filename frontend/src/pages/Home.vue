@@ -177,6 +177,9 @@ const conditionColor: Record<string, string> = {
 
 <style scoped>
 /* --- Hero layout --- */
+.condition-badge{
+  color:black
+}
 .home-hero{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:clamp(48px,6vw,96px) 20px; }
 .inline-brand{ margin-left:4px; }
 .welcome{ white-space:normal; letter-spacing:.2px; }
