@@ -47,6 +47,7 @@ model User {
   createdAt    DateTime  @default(now())
   bids         Bid[]
   auctions     Auction[] @relation("SellerAuctions")
+  favorites    Favorite[]
 }
 
 model Auction {
@@ -71,6 +72,7 @@ model Auction {
   images       AuctionImage[]
   winnerBidId  String?        @unique // <--- tu dodane
   winnerBid    Bid?           @relation("Winner", fields: [winnerBidId], references: [id])
+  favorites    Favorite[]
 }
 
 model AuctionImage {
@@ -90,6 +92,16 @@ model Bid {
   auction   Auction  @relation(fields: [auctionId], references: [id])
   auctionId String
   winnerOf  Auction? @relation("Winner") // <--- to dodajemy
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  auction   Auction  @relation(fields: [auctionId], references: [id])
+  auctionId String
+
+  @@unique([userId, auctionId])
 }
 
 model AuditLog {

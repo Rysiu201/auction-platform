@@ -8,6 +8,8 @@ const user = computed(() => {
   const raw = localStorage.getItem('user');
   return raw ? JSON.parse(raw) : null;
 });
+const isAdmin = computed(() => user.value?.role === 'ADMIN');
+const menuOpen = ref(false);
 
 const settings = ref<{ nextAuctionIso: string | null } | null>(null);
 const now = ref(Date.now());
@@ -47,10 +49,25 @@ function logout() {
       <router-link to="/contact">Kontakt</router-link>
     </nav>
     <div class="user-links">
-      <router-link to="/admin" class="admin-link">Panel admina</router-link>
+      <div v-if="user">
+        <div v-if="isAdmin" class="admin-dropdown">
+          <button class="admin-link" @click="menuOpen = !menuOpen">Menu ▾</button>
+          <div v-if="menuOpen" class="dropdown-menu">
+            <router-link to="/admin" @click="menuOpen=false">Panel Admina</router-link>
+            <router-link to="/my-auctions" @click="menuOpen=false">Moje Aukcje</router-link>
+          </div>
+        </div>
+        <router-link v-else to="/my-auctions" class="admin-link">Moje Aukcje</router-link>
+      </div>
       <router-link v-if="!user" to="/login">Zaloguj</router-link>
       <span v-else class="welcome">Witaj, {{ user.name }}</span>
       <button v-if="user" class="btn small logout-btn" @click="logout">Wyloguj</button>
     </div>
   </header>
 </template>
+
+<style scoped>
+.admin-dropdown { position: relative; display:inline-block; }
+.dropdown-menu { position:absolute; right:0; background:#fff; border:1px solid #c9d3dd; display:flex; flex-direction:column; }
+.dropdown-menu a { padding:6px 12px; white-space:nowrap; }
+</style>

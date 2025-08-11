@@ -253,14 +253,15 @@ auctionsRouter.post("/:id/bid", requireAuth, async (req, res) => {
   }
 
   res.json({ ok: true, topAmount: amount, endsAt });
+});
 
-  // Zwycięzca i suma końcowa (po zakończeniu)
+// Zwycięzca i suma końcowa (po zakończeniu)
 auctionsRouter.get("/:id/winner", async (req, res) => {
   const a = await prisma.auction.findUnique({
     where: { id: req.params.id },
     include: {
-      winnerBid: { include: { user: { select: { id: true, name: true, email: true } } } }
-    }
+      winnerBid: { include: { user: { select: { id: true, name: true, email: true } } } },
+    },
   });
   if (!a) return res.status(404).json({ message: "Not found" });
   if (a.status !== "ENDED") return res.status(400).json({ message: "Aukcja jeszcze trwa" });
@@ -269,4 +270,75 @@ auctionsRouter.get("/:id/winner", async (req, res) => {
   const user = a.winnerBid?.user ?? null;
   res.json({ amount, user });
 });
+
+// -------- MOJE AUKCJE / ULUBIONE ---------
+auctionsRouter.get("/my", requireAuth, async (req, res) => {
+  const user = (req as any).user as { id: string };
+  const auctions = await prisma.auction.findMany({
+    where: {
+      OR: [
+        { bids: { some: { userId: user.id } } },
+        { favorites: { some: { userId: user.id } } },
+      ],
+    },
+    include: { images: true, bids: true },
+    orderBy: { endsAt: "asc" },
+  });
+  res.json(auctions);
+});
+
+auctionsRouter.post("/:id/favorite", requireAuth, async (req, res) => {
+  const user = (req as any).user as { id: string };
+  const { id } = req.params;
+  await prisma.favorite.upsert({
+    where: { userId_auctionId: { userId: user.id, auctionId: id } },
+    update: {},
+    create: { userId: user.id, auctionId: id },
+  });
+  res.json({ ok: true });
+});
+
+auctionsRouter.delete("/:id/favorite", requireAuth, async (req, res) => {
+  const user = (req as any).user as { id: string };
+  const { id } = req.params;
+  await prisma.favorite.deleteMany({
+    where: { userId: user.id, auctionId: id },
+  });
+  res.json({ ok: true });
+});
+
+// ------------- EDYCJA / USUWANIE --------------
+auctionsRouter.put("/:id", requireAuth, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { title, description, basePricePLN, minIncrementPLN, startsAt, endsAt } =
+    req.body ?? {};
+  try {
+    await prisma.auction.update({
+      where: { id },
+      data: {
+        ...(title ? { title } : {}),
+        ...(description ? { description } : {}),
+        ...(basePricePLN ? { basePrice: toGrosze(basePricePLN) } : {}),
+        ...(minIncrementPLN ? { minIncrement: toGrosze(minIncrementPLN) } : {}),
+        ...(startsAt ? { startsAt: new Date(startsAt) } : {}),
+        ...(endsAt ? { endsAt: new Date(endsAt) } : {}),
+      },
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ message: "Nie udało się zaktualizować aukcji" });
+  }
+});
+
+auctionsRouter.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  await prisma.auction.update({
+    where: { id },
+    data: { winnerBidId: null },
+  }).catch(() => {});
+  await prisma.bid.deleteMany({ where: { auctionId: id } });
+  await prisma.auctionImage.deleteMany({ where: { auctionId: id } });
+  await prisma.favorite.deleteMany({ where: { auctionId: id } });
+  await prisma.auction.delete({ where: { id } });
+  res.json({ ok: true });
 });
