@@ -135,15 +135,5 @@ async function toggleFavorite(a: Auction, e: Event) {
   text-align: center;
   color:black;
 }
-.fav-btn{
-  position:absolute;
-  top:4px;
-  right:4px;
-  background:transparent;
-  border:none;
-  font-size:20px;
-  cursor:pointer;
-  color:gold;
-}
 </style>
 

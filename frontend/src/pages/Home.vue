@@ -7,9 +7,11 @@ const backend = import.meta.env.VITE_BACKEND_URL as string;
 type Auction = {
   id: string;
   title: string;
+  endsAt: string;
   basePrice: number;
   bids: { amount: number }[];
   images: { url: string; position: number }[];
+  condition: string;
 };
 
 type Settings = {
@@ -93,6 +95,24 @@ function currentPrice(a: Auction) {
   const top = a.bids.length ? Math.max(...a.bids.map(b => b.amount)) : 0;
   return fmtPrice(Math.max(a.basePrice, top));
 }
+
+function fmtDate(s: string) { return new Date(s).toLocaleString(); }
+
+const conditionLabel: Record<string, string> = {
+  NOWY: 'Nowy',
+  BARDZO_DOBRY: 'Bardzo dobry',
+  DOBRY: 'Dobry',
+  USZKODZONY: 'Uszkodzony',
+  DO_NAPRAWY: 'Do naprawy',
+};
+
+const conditionColor: Record<string, string> = {
+  DO_NAPRAWY: '#FFA500',
+  USZKODZONY: '#FF0000',
+  DOBRY: '#FFFF00',
+  BARDZO_DOBRY: '#00FFFF',
+  NOWY: '#008000',
+};
 </script>
 
 <template>
@@ -110,14 +130,33 @@ function currentPrice(a: Auction) {
       Dołącz do naszych licytacji firmowego sprzętu komputerowego – głównie laptopów używanych w różnym stanie technicznym. Każdy przedmiot ma indywidualny opis…
     </p>
 
-    <div v-if="auctionsActive && latest.length" class="latest-auctions">
-      <article v-for="a in latest" :key="a.id" class="latest-card">
-        <img v-if="a.images?.[0]" :src="`${backend}${a.images[0].url}`" alt="" class="latest-image" />
-        <div class="latest-info">
-          <router-link :to="`/auction/${a.id}`" class="latest-title">{{ a.title }}</router-link>
-          <div class="latest-price">{{ currentPrice(a) }} PLN</div>
-        </div>
-      </article>
+    <div v-if="auctionsActive && latest.length" class="latest-auctions auction-grid">
+      <router-link
+        v-for="a in latest"
+        :key="a.id"
+        :to="`/auction/${a.id}`"
+        class="auction-link"
+      >
+        <article class="auction-card">
+          <div class="image-wrapper">
+            <img
+              v-if="a.images?.[0]"
+              :src="`${backend}${a.images[0].url}`"
+              alt=""
+              class="auction-image"
+            />
+            <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
+              {{ conditionLabel[a.condition] || a.condition }}
+            </span>
+          </div>
+          <div class="auction-info">
+            <h3 class="auction-title">{{ a.title }}</h3>
+            <div class="auction-price">{{ currentPrice(a) }} PLN</div>
+            <div class="auction-offers">{{ a.bids.length }} ofert</div>
+          </div>
+          <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
+        </article>
+      </router-link>
     </div>
 
     <div class="next-auctions">Następna Pula Aukcji:</div>
@@ -147,11 +186,7 @@ function currentPrice(a: Auction) {
 .no-schedule{ color:#6b7c8a; margin-bottom:8px; }
 
 /* --- Latest auctions --- */
-.latest-auctions{ display:flex; gap:16px; margin-top:30px; flex-wrap:wrap; justify-content:center; }
-.latest-card{ width:220px; text-align:left; }
-.latest-image{ width:100%; height:140px; object-fit:cover; border-radius:10px; }
-.latest-title{ font-weight:700; display:block; margin-top:8px; color:#24303a; }
-.latest-price{ color:#556370; }
+.latest-auctions{ margin-top:30px; }
 
 .cta-button{ margin-top:36px; background:#0059b3; color:#fff; padding:14px 28px; border-radius:999px;
   transition:background-color .25s ease, transform .1s ease; display:inline-block; font-weight:700; }
