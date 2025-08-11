@@ -4,10 +4,11 @@ import { useRouter } from 'vue-router';
 import { api } from '@/api';
 
 const router = useRouter();
-const user = computed(() => {
+const user = ref<any>(null);
+function loadUser() {
   const raw = localStorage.getItem('user');
-  return raw ? JSON.parse(raw) : null;
-});
+  user.value = raw ? JSON.parse(raw) : null;
+}
 const isAdmin = computed(() => user.value?.role === 'ADMIN');
 const menuOpen = ref(false);
 
@@ -16,11 +17,13 @@ const now = ref(Date.now());
 let timer: number | null = null;
 
 onMounted(async () => {
+  loadUser();
   try { const { data } = await api.get('/settings'); settings.value = data; } catch {}
   timer = window.setInterval(() => { now.value = Date.now(); }, 1000);
+  window.addEventListener('user-change', loadUser);
 });
 
-onBeforeUnmount(() => { if (timer) clearInterval(timer); });
+onBeforeUnmount(() => { if (timer) clearInterval(timer); window.removeEventListener('user-change', loadUser); });
 
 const auctionsActive = computed(() => {
   const iso = settings.value?.nextAuctionIso;
@@ -30,8 +33,8 @@ const auctionsActive = computed(() => {
 
 function logout() {
   localStorage.removeItem('user');
+  window.dispatchEvent(new Event('user-change'));
   router.push('/');
-  window.location.reload();
 }
 </script>
 

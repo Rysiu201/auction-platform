@@ -164,7 +164,7 @@ const conditionColor: Record<string, string> = {
     <p v-if="!hasSchedule" class="no-schedule">
       Termin nie został jeszcze wyznaczony.
     </p>
-    <p v-else-if="auctionsActive" class="no-schedule">
+    <p v-else-if="auctionsActive" class="auction-running">
       Aktualnie trwa aukcja.
     </p>
     <div v-else class="countdown" role="timer" aria-live="polite">
@@ -187,6 +187,7 @@ const conditionColor: Record<string, string> = {
 
 .next-auctions{ margin:34px 0 12px; color:#506674; font-size:20px; }
 .no-schedule{ color:#6b7c8a; margin-bottom:8px; }
+.auction-running{ color:#fff; background:#0059b3; padding:4px 8px; border-radius:4px; font-weight:600; }
 
 /* --- Latest auctions --- */
 .latest-auctions{ margin-top:30px; }

@@ -13,6 +13,7 @@ async function submit() {
   try {
     const { data } = await api.post("/auth/login", { email: email.value, password: password.value });
     localStorage.setItem("user", JSON.stringify(data));
+    window.dispatchEvent(new Event("user-change"));
     router.push("/");
   } catch (e:any) {
     error.value = e?.response?.data?.message ?? "Błąd logowania";
@@ -24,6 +25,7 @@ async function loginSSO() {
   try {
     const { data } = await api.post("/auth/sso");
     localStorage.setItem("user", JSON.stringify(data));
+    window.dispatchEvent(new Event("user-change"));
     router.push("/");
   } catch (e:any) {
     error.value = e?.response?.data?.message ?? "Błąd logowania SSO";
@@ -35,6 +37,7 @@ async function loginLDAP() {
   try {
     const { data } = await api.post("/auth/ldap", { username: email.value, password: password.value });
     localStorage.setItem("user", JSON.stringify(data));
+    window.dispatchEvent(new Event("user-change"));
     router.push("/");
   } catch (e:any) {
     error.value = e?.response?.data?.message ?? "Błąd logowania LDAP";

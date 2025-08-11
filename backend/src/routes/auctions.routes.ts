@@ -63,9 +63,26 @@ auctionsRouter.get(
     const noBids = ended.filter((a) => a.bids.length === 0);
     const finished = ended.filter((a) => a.bids.length > 0);
 
-    res.json({ active, ended: finished, noBids });
+  res.json({ active, ended: finished, noBids });
   }
 );
+
+// -------- MOJE AUKCJE / ULUBIONE ---------
+auctionsRouter.get("/my", requireAuth, async (req, res) => {
+  const user = (req as any).user as { id: string };
+  const auctions = await prisma.auction.findMany({
+    where: {
+      OR: [
+        { bids: { some: { userId: user.id } } },
+        { favorites: { some: { userId: user.id } } },
+        { sellerId: user.id },
+      ],
+    },
+    include: { images: true, bids: true },
+    orderBy: { endsAt: "asc" },
+  });
+  res.json(auctions);
+});
 
 // --------------------------- SZCZEGÓŁ ----------------------------
 auctionsRouter.get("/:id", async (req, res) => {
@@ -271,23 +288,7 @@ auctionsRouter.get("/:id/winner", async (req, res) => {
   res.json({ amount, user });
 });
 
-// -------- MOJE AUKCJE / ULUBIONE ---------
-auctionsRouter.get("/my", requireAuth, async (req, res) => {
-  const user = (req as any).user as { id: string };
-  const auctions = await prisma.auction.findMany({
-    where: {
-      OR: [
-        { bids: { some: { userId: user.id } } },
-        { favorites: { some: { userId: user.id } } },
-        { sellerId: user.id },
-      ],
-    },
-    include: { images: true, bids: true },
-    orderBy: { endsAt: "asc" },
-  });
-  res.json(auctions);
-});
-
+// -------- ULUBIONE ---------
 auctionsRouter.post("/:id/favorite", requireAuth, async (req, res) => {
   const user = (req as any).user as { id: string };
   const { id } = req.params;
