@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, computed, watch, nextTick } from "vue";
+import { onMounted, onBeforeUnmount, ref, computed, watch } from "vue";
 import { api } from "@/api";
 
 const backend = import.meta.env.VITE_BACKEND_URL as string;
@@ -21,14 +21,6 @@ type Settings = {
 const latest = ref<Auction[]>([]);
 const settings = ref<Settings | null>(null);
 
-/* ---- FLIP CLOCK ---- */
-type Unit = { label: string; digits: string[] };
-const timeUnits = ref<Unit[]>([
-  { label: "godz", digits: ["0", "0"] },
-  { label: "min",  digits: ["0", "0"] },
-  { label: "sek",  digits: ["0", "0"] },
-]);
-
 let intervalId: number | null = null;
 
 const targetMs = computed(() => {
@@ -45,57 +37,19 @@ function updateMsLeft() {
   msLeft.value = targetMs.value ? Math.max(0, targetMs.value - Date.now()) : 0;
 }
 
-function renderFromMs(ms: number) {
-  const total = Math.floor(ms / 1000);
+const formattedTime = computed(() => {
+  const total = Math.floor(msLeft.value / 1000);
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
-
-  const hh = String(h).padStart(2, "0");
-  const mm = String(m).padStart(2, "0");
-  const ss = String(s).padStart(2, "0");
-
-  [hh, mm, ss].forEach((val, unitIdx) => {
-    val.split("").forEach((digit, pos) => {
-      if (timeUnits.value[unitIdx].digits[pos] !== digit) {
-        flip(unitIdx, pos, digit);
-      }
-    });
-  });
-}
-
-function flip(unitIdx: number, pos: number, nextDigit: string) {
-  const unitEl = document.querySelectorAll(".flip-unit")[unitIdx];
-  const card = unitEl?.querySelectorAll<HTMLElement>(".flip-card")[pos];
-  if (!card) return;
-
-  const top = card.querySelector<HTMLElement>(".top")!;
-  const bottom = card.querySelector<HTMLElement>(".bottom")!;
-  const nextTop = card.querySelector<HTMLElement>(".next-top")!;
-  const nextBottom = card.querySelector<HTMLElement>(".next-bottom")!;
-
-  nextTop.textContent = nextDigit;
-  nextBottom.textContent = nextDigit;
-
-  card.classList.add("flip-anim");
-  setTimeout(() => {
-    top.textContent = nextDigit;
-    bottom.textContent = nextDigit;
-    timeUnits.value[unitIdx].digits[pos] = nextDigit;
-    card.classList.remove("flip-anim");
-  }, 600);
-}
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+});
 
 function startCountdownToTarget() {
   stopCountdown();
   updateMsLeft();
-  // pierwsze wyrenderowanie
-  renderFromMs(msLeft.value);
-
-  // korygowany interwał – liczymy za każdym razem od nowa
   intervalId = window.setInterval(() => {
     updateMsLeft();
-    renderFromMs(msLeft.value);
     if (msLeft.value <= 0) stopCountdown();
   }, 1000);
 }
@@ -123,9 +77,8 @@ onMounted(async () => {
 
 watch(targetMs, updateMsLeft, { immediate: true });
 
-watch(hasCountdown, async (val) => {
+watch(hasCountdown, (val) => {
   if (val) {
-    await nextTick();
     startCountdownToTarget();
   } else {
     stopCountdown();
@@ -175,16 +128,8 @@ function currentPrice(a: Auction) {
     <p v-else-if="auctionsActive" class="no-schedule">
       Aktualnie trwa aukcja.
     </p>
-    <div v-else class="flip-clock" role="timer" aria-live="polite">
-      <div class="flip-unit" v-for="unit in timeUnits" :key="unit.label">
-        <div class="flip-card" v-for="(digit, i) in unit.digits" :key="i">
-          <div class="card-face top">{{ digit }}</div>
-          <div class="card-face bottom">{{ digit }}</div>
-          <div class="card-face next-top">{{ digit }}</div>
-          <div class="card-face next-bottom">{{ digit }}</div>
-        </div>
-        <span class="label">{{ unit.label }}</span>
-      </div>
+    <div v-else class="countdown" role="timer" aria-live="polite">
+      {{ formattedTime }}
     </div>
 
     <router-link v-if="auctionsActive && latest.length" to="/auctions" class="cta-button">Zobacz Aktualne Aukcje</router-link>
@@ -212,52 +157,9 @@ function currentPrice(a: Auction) {
   transition:background-color .25s ease, transform .1s ease; display:inline-block; font-weight:700; }
 .cta-button:hover{ background:#0066cc; transform:translateY(-1px); }
 
-/* ================= FLIP CLOCK (pełny 3D) ================= */
-.flip-clock{
-  /* zmienne muszą być zdefiniowane na elemencie w zasięgu, nie w :root ze style scoped */
-  --digit-w:clamp(52px,6.2vw,88px);
-  --digit-h:clamp(76px,9vw,132px);
-  --radius:14px;
-  --font:clamp(38px,6vw,78px);
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  display:flex; gap:clamp(18px,2.6vw,28px); align-items:flex-end; user-select:none;
-}
-.flip-unit{ display:flex; flex-direction:column; align-items:center; }
-.flip-unit .label{ margin-top:10px; font-size:13px; color:#6b7c8a; letter-spacing:.4px; }
-
-.flip-card{ position:relative; width:var(--digit-w); height:var(--digit-h); margin:0 3px; perspective:1100px; }
-.card-face{
-  position:absolute; left:0; right:0; background:#1b222b; color:#ecf2f8;
-  font:700 var(--font)/1 var(--mono); display:flex; align-items:center; justify-content:center;
-  overflow:hidden; backface-visibility:hidden; will-change:transform; box-shadow:0 8px 18px rgba(0,0,0,.28);
-}
-.top{
-  top:0; height:50%; border-radius:14px 14px 0 0; border-bottom:1px solid rgba(255,255,255,.08);
-  transform-origin:bottom; background:linear-gradient(180deg,#171c22 0%, #1b222b 100%);
-}
-.bottom{
-  bottom:0; height:50%; border-radius:0 0 14px 14px; border-top:1px solid rgba(255,255,255,.06);
-  transform-origin:top; background:linear-gradient(180deg,#1b222b 0%, #15191f 100%);
-}
-.next-top{
-  top:0; height:50%; border-radius:14px 14px 0 0; border-bottom:1px solid rgba(255,255,255,.08);
-  transform-origin:bottom; transform:rotateX(90deg); background:linear-gradient(180deg,#171c22 0%, #1b222b 100%);
-}
-.next-bottom{
-  bottom:0; height:50%; border-radius:0 0 14px 14px; border-top:1px solid rgba(255,255,255,.06);
-  transform-origin:top; transform:rotateX(-90deg); background:linear-gradient(180deg,#1b222b 0%, #15191f 100%);
-}
-.flip-card::before{ content:""; position:absolute; left:0; right:0; top:50%; height:1px; transform:translateY(-.5px);
-  background:rgba(255,255,255,.06); z-index:2; }
-.flip-card::after{ content:""; position:absolute; inset:0; pointer-events:none;
-  box-shadow:inset 0 18px 28px rgba(0,0,0,.35), inset 0 -18px 28px rgba(0,0,0,.35); border-radius:14px; }
-.flip-card.flip-anim .top{ animation:flipTop .32s ease-in forwards; }
-.flip-card.flip-anim .next-bottom{ animation:flipBottom .32s ease-out .30s forwards; }
-@keyframes flipTop{ 0%{ transform:rotateX(0deg);} 100%{ transform:rotateX(-90deg);} }
-@keyframes flipBottom{ 0%{ transform:rotateX(-90deg);} 100%{ transform:rotateX(0deg);} }
-
-@media (max-width:540px){
-  .flip-clock{ gap:16px; }
-  .flip-unit .label{ font-size:12px; }
+/* ================= Prosty licznik ================= */
+.countdown{
+  font:700 clamp(38px,6vw,78px)/1 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  margin-top:16px;
 }
 </style>

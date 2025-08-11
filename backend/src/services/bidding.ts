@@ -37,7 +37,8 @@ export function attachBidding(io: Server) {
 
           // zapis oferty
           const bid = await prisma.bid.create({
-            data: { amount, userId, auctionId }
+            data: { amount, userId, auctionId },
+            include: { user: { select: { id: true, name: true } } }
           });
 
           // (opcjonalnie) anti-sniping: przedłuż o 2 min jeśli < 120s do końca
@@ -53,8 +54,9 @@ export function attachBidding(io: Server) {
 
           // broadcast
           io.to(auctionId).emit("new-bid", {
+            auctionId,
             amount: bid.amount,
-            userId: bid.userId,
+            user: bid.user,
             createdAt: bid.createdAt
           });
           if (newEndsAt) {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
 import { api } from '@/api';
+import { socket } from '@/socket';
 
 type Winner = { amount: number; user: { name: string } } | null;
 type Auction = {
@@ -50,6 +51,7 @@ async function fetchOverview() {
   try {
     const { data } = await api.get('/auctions/admin/overview');
     overview.value = data;
+    data.active.forEach(a => socket.emit('join-auction', a.id));
   } catch (e: any) {
     error.value = e?.message ?? 'Błąd';
   }
@@ -59,15 +61,24 @@ let timer: number | undefined;
 let nowInterval: number | undefined;
 const now = ref(Date.now());
 
+function handleNewBid(payload: { auctionId: string; amount: number; user: { name: string } }) {
+  const auction = overview.value?.active.find(a => a.id === payload.auctionId);
+  if (auction) {
+    auction.bids = [{ amount: payload.amount, user: { name: payload.user.name } }];
+  }
+}
+
 onMounted(() => {
   fetchOverview();
   timer = window.setInterval(fetchOverview, 5000);
   nowInterval = window.setInterval(() => (now.value = Date.now()), 1000);
+  socket.on('new-bid', handleNewBid);
 });
 
 onUnmounted(() => {
   if (timer) window.clearInterval(timer);
   if (nowInterval) window.clearInterval(nowInterval);
+  socket.off('new-bid', handleNewBid);
 });
 
 function openRelist(a: Auction) {
