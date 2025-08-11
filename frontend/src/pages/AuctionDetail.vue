@@ -13,6 +13,7 @@ const topAmount = ref(0); // grosze
 const myBidPLN = ref<string>("");
 const msg = ref<string | null>(null);
 const currentImg = ref(0);
+const previewUrl = ref<string | null>(null);
 const timeLeft = ref(0);
 const conditionLabel: Record<string, string> = {
   NOWY: 'Nowy',
@@ -104,6 +105,15 @@ onUnmounted(() => {
   if (pollTimer) window.clearInterval(pollTimer);
   if (countTimer) window.clearInterval(countTimer);
 });
+
+function openPreview(i: number) {
+  if (!auction.value) return;
+  previewUrl.value = `${backend}${auction.value.images[i].url}`;
+}
+
+function closePreview() {
+  previewUrl.value = null;
+}
 </script>
 
 <template>
@@ -114,6 +124,7 @@ onUnmounted(() => {
         :src="`${backend}${auction.images[currentImg].url}`"
         alt=""
         class="main-image"
+        @click="openPreview(currentImg)"
       />
       <div v-if="auction.images?.length > 1" class="thumbs">
         <img
@@ -121,7 +132,7 @@ onUnmounted(() => {
           :key="img.url"
           :src="`${backend}${img.url}`"
           :class="['thumb', { active: i === currentImg }]"
-          @click="currentImg = i"
+          @click="currentImg = i; openPreview(i)"
         />
       </div>
     </div>
@@ -156,6 +167,9 @@ onUnmounted(() => {
     </div>
   </div>
   <p v-else>Ładowanie…</p>
+  <div v-if="previewUrl" class="img-preview" @click="closePreview">
+    <img :src="previewUrl" alt="" />
+  </div>
 </template>
 
 <style scoped>
@@ -176,6 +190,7 @@ onUnmounted(() => {
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 12px;
+  cursor: zoom-in;
 }
 .thumbs {
   display: flex;
@@ -188,7 +203,7 @@ onUnmounted(() => {
   height: 72px;
   object-fit: cover;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: zoom-in;
   opacity: 0.7;
   transition: transform 0.2s, opacity 0.2s;
 }
@@ -221,6 +236,7 @@ onUnmounted(() => {
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 12px;
+  font-weight: 700;
 }
 .price-box .label {
   font-size: 14px;
@@ -261,11 +277,27 @@ onUnmounted(() => {
 }
 .extra-info h3 {
   margin: 0 0 8px;
+  text-align: center;
 }
 .not-started {
   color: #6b7280;
 }
 .error {
   color: red;
+}
+
+.img-preview {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.img-preview img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
 }
 </style>

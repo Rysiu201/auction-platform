@@ -23,6 +23,12 @@ const user = ref<any>(null);
 const myIds = ref<Set<string>>(new Set());
 let refresh: number | null = null;
 
+function loadUser() {
+  const raw = localStorage.getItem("user");
+  user.value = raw ? JSON.parse(raw) : null;
+}
+function onUserChange() { loadUser(); loadMy(); }
+
 async function loadAuctions() {
   try {
     const { data } = await api.get("/auctions");
@@ -43,15 +49,16 @@ async function loadMy() {
 }
 
 onMounted(async () => {
-  const raw = localStorage.getItem("user");
-  if (raw) user.value = JSON.parse(raw);
+  loadUser();
   await loadAuctions();
   await loadMy();
   refresh = window.setInterval(() => { loadAuctions(); loadMy(); }, 5000);
+  window.addEventListener("user-change", onUserChange);
 });
 
 onUnmounted(() => {
   if (refresh) clearInterval(refresh);
+  window.removeEventListener("user-change", onUserChange);
 });
 
 function fmtDate(s: string) {
