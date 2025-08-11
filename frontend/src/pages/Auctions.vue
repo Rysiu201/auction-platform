@@ -106,4 +106,8 @@ function currentPrice(a: Auction) {
 
 <style scoped>
 .page-section { padding:40px 20px; text-align:center; }
+.condition-badge{
+  text-align: center;
+  color:black
+}
 </style>

@@ -159,6 +159,9 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.auction-desc {
+  color: black
+}
 .auction-detail {
   max-width: 1200px;
   margin: 0 auto;
@@ -214,7 +217,7 @@ onUnmounted(() => {
 }
 .detail-condition {
   align-self: flex-start;
-  color: #fff;
+  color: rgb(0, 0, 0);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 12px;
