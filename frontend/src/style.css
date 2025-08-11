@@ -138,6 +138,15 @@ button:focus-visible {
 .delete-btn {
   background: #cc0000;
   border-color: #cc0000;
+  margin-top: 0.5vh;
+  width: 8vh;
+  height: 5vh;
+  margin-left: 1vh;
+  margin-right: 1vh;
+  border-width: 0.2vh;
+  border-color: black;
+  text-align: center;
+  border-radius: 1vh;
 }
 .delete-btn:hover {
   background: #ff3333;
@@ -147,6 +156,15 @@ button:focus-visible {
 .edit-btn {
   background: #0059b3;
   border-color: #0059b3;
+  width: 8vh;
+  height: 5vh;
+  margin-top: 1vh;
+  margin-left: 1vh;
+  margin-right: 1vh;
+  border-radius: 1vh;
+  border-width: 0.2vh;
+  border-color: black;
+  text-align: center;
 }
 .edit-btn:hover {
   background: #0073e6;
@@ -156,6 +174,15 @@ button:focus-visible {
 .relist-btn {
   background: #ff8c00;
   border-color: #ff8c00;
+  width: 8vh;
+  height: 5vh;
+  margin-top: 1vh;
+  margin-left: 1vh;
+  margin-right: 1vh;
+  border-radius: 1vh;
+  border-width: 0.2vh;
+  border-color: black;
+  text-align: center;
 }
 .relist-btn:hover {
   background: #ffa64d;
