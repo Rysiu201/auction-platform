@@ -21,12 +21,11 @@ vi.mock('@/api', () => ({
 const flush = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('Home countdown', () => {
-  it('renders visible digits when next auction is scheduled', async () => {
+  it('renders countdown when next auction is scheduled', async () => {
     const wrapper = mount(Home, { global: { stubs: ['router-link'] } });
     await flush();
     await flush();
-    const digits = wrapper.findAll('.flip-card .top').map(el => el.text());
-    expect(digits.length).toBe(6);
-    digits.forEach(d => expect(d).toMatch(/^\d$/));
+    const text = wrapper.find('.countdown').text();
+    expect(text).toMatch(/^\d{2}:\d{2}:\d{2}$/);
   });
 });
