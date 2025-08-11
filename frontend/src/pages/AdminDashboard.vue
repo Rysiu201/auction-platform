@@ -191,7 +191,7 @@ async function deleteAuction(id: string) {
                   <td>{{ fmtPrice(Math.max(a.basePrice, a.bids?.[0]?.amount || 0)) }}</td>
                   <td>{{ a.bids?.[0]?.user?.name || '—' }}</td>
                   <td>{{ timeLeft(a) }}</td>
-                  <td><button class="btn small" @click="openEdit(a)">Edytuj</button></td>
+                  <td><button class="btn small edit-btn" @click="openEdit(a)">Edytuj</button></td>
                 </tr>
               </tbody>
             </table>
@@ -207,7 +207,7 @@ async function deleteAuction(id: string) {
                   <td>{{ a.title }}</td>
                   <td>{{ a.winnerBid?.user.name || '—' }}</td>
                   <td>{{ fmtPrice(a.winnerBid?.amount || 0) }}</td>
-                  <td><button class="btn small" @click="deleteAuction(a.id)">Usuń</button></td>
+                  <td><button class="btn small delete-btn" @click="deleteAuction(a.id)">Usuń</button></td>
                 </tr>
               </tbody>
             </table>
@@ -231,8 +231,8 @@ async function deleteAuction(id: string) {
                   <td>{{ fmtDate(a.startsAt) }}</td>
                   <td>{{ fmtDate(a.endsAt) }}</td>
                   <td>
-                    <button class="btn small" @click="openRelist(a)">Wystaw ponownie</button>
-                    <button class="btn small" @click="deleteAuction(a.id)">Usuń Aukcję</button>
+                    <button class="btn small relist-btn" @click="openRelist(a)">Wystaw ponownie</button>
+                    <button class="btn small delete-btn" @click="deleteAuction(a.id)">Usuń Aukcję</button>
                   </td>
                 </tr>
               </tbody>

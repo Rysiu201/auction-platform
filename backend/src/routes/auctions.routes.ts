@@ -279,6 +279,7 @@ auctionsRouter.get("/my", requireAuth, async (req, res) => {
       OR: [
         { bids: { some: { userId: user.id } } },
         { favorites: { some: { userId: user.id } } },
+        { sellerId: user.id },
       ],
     },
     include: { images: true, bids: true },
