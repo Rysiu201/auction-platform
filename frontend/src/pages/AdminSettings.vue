@@ -9,6 +9,12 @@ const maxWonAuctions = ref<number | null>(null);
 const nextAuctionIso = ref<string | null>(null);
 
 const nextAuctionLocal = ref<string>(""); // YYYY-MM-DDTHH:mm
+function formatDisplay(iso: string) {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const year = String(d.getFullYear()).slice(-2);
+  return `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${year} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 const saving = ref(false);
 const message = ref<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -195,7 +201,7 @@ onMounted(load);
           </div>
 
           <p v-if="message" :class="['msg', message.type]">{{ message.text }}</p>
-          <p class="hint">Aktualny termin (ISO): <strong>{{ nextAuctionIso || 'brak' }}</strong></p>
+          <p class="hint">Aktualny termin: <strong>{{ nextAuctionIso ? formatDisplay(nextAuctionIso) : 'brak' }}</strong></p>
         </div>
       </main>
     </div>

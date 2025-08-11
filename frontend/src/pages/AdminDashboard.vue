@@ -28,6 +28,20 @@ const minIncrementPLN = ref('');
 const startsAt = ref('');
 const endsAt = ref('');
 
+const editAuction = ref<any | null>(null);
+const editTitle = ref('');
+const editDescription = ref('');
+const editBasePricePLN = ref('');
+const editMinIncrementPLN = ref('');
+const editStartsAt = ref('');
+const editEndsAt = ref('');
+
+function toLocalInput(dt: string) {
+  const d = new Date(dt);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function toISO(dt: string) {
   return dt ? new Date(dt).toISOString() : '';
 }
@@ -104,6 +118,49 @@ async function submitRelist() {
     alert(e?.response?.data?.message ?? 'Błąd');
   }
 }
+
+async function openEdit(a: Auction) {
+  try {
+    const { data } = await api.get(`/auctions/${a.id}`);
+    editAuction.value = data;
+    editTitle.value = data.title;
+    editDescription.value = data.description;
+    editBasePricePLN.value = String(data.basePrice / 100);
+    editMinIncrementPLN.value = String(data.minIncrement / 100);
+    editStartsAt.value = toLocalInput(data.startsAt);
+    editEndsAt.value = toLocalInput(data.endsAt);
+  } catch (e) {
+    alert('Błąd pobierania aukcji');
+  }
+}
+
+async function submitEdit() {
+  if (!editAuction.value) return;
+  try {
+    await api.put(`/auctions/${editAuction.value.id}`, {
+      title: editTitle.value,
+      description: editDescription.value,
+      basePricePLN: editBasePricePLN.value,
+      minIncrementPLN: editMinIncrementPLN.value,
+      startsAt: toISO(editStartsAt.value),
+      endsAt: toISO(editEndsAt.value),
+    });
+    editAuction.value = null;
+    await fetchOverview();
+  } catch (e: any) {
+    alert(e?.response?.data?.message ?? 'Błąd');
+  }
+}
+
+async function deleteAuction(id: string) {
+  if (!confirm('Usunąć aukcję?')) return;
+  try {
+    await api.delete(`/auctions/${id}`);
+    await fetchOverview();
+  } catch (e: any) {
+    alert(e?.response?.data?.message ?? 'Błąd');
+  }
+}
 </script>
 
 <template>
@@ -126,7 +183,7 @@ async function submitRelist() {
             <h2>Aktywne</h2>
             <table>
               <thead>
-                <tr><th>Tytuł</th><th>Cena</th><th>Zwycięzca</th><th>Pozostały czas</th></tr>
+                <tr><th>Tytuł</th><th>Cena</th><th>Zwycięzca</th><th>Pozostały czas</th><th></th></tr>
               </thead>
               <tbody>
                 <tr v-for="a in overview.active" :key="a.id">
@@ -134,6 +191,7 @@ async function submitRelist() {
                   <td>{{ fmtPrice(Math.max(a.basePrice, a.bids?.[0]?.amount || 0)) }}</td>
                   <td>{{ a.bids?.[0]?.user?.name || '—' }}</td>
                   <td>{{ timeLeft(a) }}</td>
+                  <td><button class="btn small" @click="openEdit(a)">Edytuj</button></td>
                 </tr>
               </tbody>
             </table>
@@ -142,13 +200,14 @@ async function submitRelist() {
             <h2>Zakończone</h2>
             <table>
               <thead>
-                <tr><th>Tytuł</th><th>Zwycięzca</th><th>Kwota</th></tr>
+                <tr><th>Tytuł</th><th>Zwycięzca</th><th>Kwota</th><th></th></tr>
               </thead>
               <tbody>
                 <tr v-for="a in overview.ended" :key="a.id">
                   <td>{{ a.title }}</td>
                   <td>{{ a.winnerBid?.user.name || '—' }}</td>
                   <td>{{ fmtPrice(a.winnerBid?.amount || 0) }}</td>
+                  <td><button class="btn small" @click="deleteAuction(a.id)">Usuń</button></td>
                 </tr>
               </tbody>
             </table>
@@ -171,7 +230,10 @@ async function submitRelist() {
                   <td>{{ fmtPrice(a.basePrice) }}</td>
                   <td>{{ fmtDate(a.startsAt) }}</td>
                   <td>{{ fmtDate(a.endsAt) }}</td>
-                  <td><button class="btn small" @click="openRelist(a)">Wystaw ponownie</button></td>
+                  <td>
+                    <button class="btn small" @click="openRelist(a)">Wystaw ponownie</button>
+                    <button class="btn small" @click="deleteAuction(a.id)">Usuń Aukcję</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -191,6 +253,23 @@ async function submitRelist() {
           <div class="modal-actions">
             <button type="submit">Zapisz</button>
             <button type="button" @click="relistAuction = null">Anuluj</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div v-if="editAuction" class="modal-backdrop">
+      <div class="modal">
+        <h3>Edytuj aukcję: {{ editTitle }}</h3>
+        <form @submit.prevent="submitEdit" class="form">
+          <input v-model="editTitle" placeholder="Tytuł" required />
+          <textarea v-model="editDescription" placeholder="Opis" rows="4" required />
+          <input v-model="editBasePricePLN" type="number" step="1" placeholder="Cena wywoławcza (PLN)" required />
+          <input v-model="editMinIncrementPLN" type="number" step="1" placeholder="Min. przebitka (PLN)" required />
+          <label>Data rozpoczęcia: <input v-model="editStartsAt" type="datetime-local" required /></label>
+          <label>Data zakończenia: <input v-model="editEndsAt" type="datetime-local" required /></label>
+          <div class="modal-actions">
+            <button type="submit">Zapisz</button>
+            <button type="button" @click="editAuction = null">Anuluj</button>
           </div>
         </form>
       </div>

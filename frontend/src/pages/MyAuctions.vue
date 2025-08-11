@@ -19,14 +19,14 @@ type Auction = {
 const auctions = ref<Auction[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
-const user = ref<any>(null);
 const myIds = ref<Set<string>>(new Set());
 let refresh: number | null = null;
 
-async function loadAuctions() {
+async function load() {
   try {
-    const { data } = await api.get("/auctions");
+    const { data } = await api.get("/auctions/my");
     auctions.value = data;
+    myIds.value = new Set(data.map((a: any) => a.id));
   } catch (e: any) {
     error.value = e?.message ?? "Błąd";
   } finally {
@@ -34,25 +34,12 @@ async function loadAuctions() {
   }
 }
 
-async function loadMy() {
-  if (!user.value) return;
-  try {
-    const { data } = await api.get("/auctions/my");
-    myIds.value = new Set(data.map((a: any) => a.id));
-  } catch {}
-}
-
 onMounted(async () => {
-  const raw = localStorage.getItem("user");
-  if (raw) user.value = JSON.parse(raw);
-  await loadAuctions();
-  await loadMy();
-  refresh = window.setInterval(() => { loadAuctions(); loadMy(); }, 5000);
+  await load();
+  refresh = window.setInterval(load, 5000);
 });
 
-onUnmounted(() => {
-  if (refresh) clearInterval(refresh);
-});
+onUnmounted(() => { if (refresh) clearInterval(refresh); });
 
 function fmtDate(s: string) {
   return new Date(s).toLocaleString();
@@ -90,10 +77,10 @@ function isMine(id: string) {
 async function toggleFavorite(a: Auction, e: Event) {
   e.preventDefault();
   e.stopPropagation();
-  if (!user.value) return;
   if (isMine(a.id)) {
     await api.delete(`/auctions/${a.id}/favorite`);
     myIds.value.delete(a.id);
+    auctions.value = auctions.value.filter(x => x.id !== a.id);
   } else {
     await api.post(`/auctions/${a.id}/favorite`);
     myIds.value.add(a.id);
@@ -103,15 +90,12 @@ async function toggleFavorite(a: Auction, e: Event) {
 
 <template>
   <section class="page-section">
-  <h1>Aktywne aukcje ({{ auctions.length }})</h1>
+  <h1>Moje aukcje ({{ auctions.length }})</h1>
 
   <p v-if="loading">Ładowanie…</p>
   <p v-if="error" style="color:red">{{ error }}</p>
 
-  <div
-    v-if="!loading && auctions.length"
-    class="auction-grid"
-  >
+  <div v-if="!loading && auctions.length" class="auction-grid">
     <router-link
       v-for="a in auctions"
       :key="a.id"
@@ -119,11 +103,7 @@ async function toggleFavorite(a: Auction, e: Event) {
       class="auction-link"
     >
       <article class="auction-card">
-        <button
-          v-if="user"
-          class="fav-btn"
-          @click="toggleFavorite(a, $event)"
-        >{{ isMine(a.id) ? '★' : '☆' }}</button>
+        <button class="fav-btn" @click="toggleFavorite(a, $event)">{{ isMine(a.id) ? '★' : '☆' }}</button>
         <div class="image-wrapper">
           <img
             v-if="a.images?.[0]"
@@ -145,7 +125,7 @@ async function toggleFavorite(a: Auction, e: Event) {
     </router-link>
   </div>
 
-  <p v-else-if="!loading && !auctions.length">Brak aktywnych aukcji.</p>
+  <p v-else-if="!loading && !auctions.length">Brak aukcji.</p>
   </section>
 </template>
 
@@ -153,7 +133,7 @@ async function toggleFavorite(a: Auction, e: Event) {
 .page-section { padding:40px 20px; text-align:center; }
 .condition-badge{
   text-align: center;
-  color:black
+  color:black;
 }
 .fav-btn{
   position:absolute;
@@ -166,3 +146,4 @@ async function toggleFavorite(a: Auction, e: Event) {
   color:gold;
 }
 </style>
+

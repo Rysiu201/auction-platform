@@ -8,6 +8,7 @@ import AuctionDetail from "@/pages/AuctionDetail.vue";
 import AdminDashboard from "@/pages/AdminDashboard.vue";
 import CreateAuction from "@/pages/CreateAuction.vue";
 import AdminSettings from "@/pages/AdminSettings.vue";
+import MyAuctions from "@/pages/MyAuctions.vue";
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -21,5 +22,6 @@ export const router = createRouter({
     { path: "/admin/settings", component: AdminSettings },
     { path: "/admin", component: AdminDashboard },
     { path: "/auction/:id", component: AuctionDetail },
+    { path: "/my-auctions", component: MyAuctions },
   ],
 });
