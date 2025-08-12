@@ -157,9 +157,114 @@ async function toggleFavorite(a: Auction, e: Event) {
 </template>
 
 <style scoped>
-.page-section { padding:40px 20px; text-align:center; }
-.condition-badge{
+/* Sekcja */
+.page-section{
+  padding: 2.5rem 1.25rem;
   text-align: center;
-  color:black
+}
+
+/* Siatka kart – wyśrodkowana i responsywna */
+.auction-grid{
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+/* Link-karta reset */
+.auction-link{
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Karta */
+.auction-card{
+  position: relative;
+  width: clamp(14rem, 24vw, 18rem);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.auction-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+
+/* Ulubione (gwiazdka) */
+.fav-btn{
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  z-index: 3;
+  background: transparent;
+  border: 0;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+/* Obrazek – robimy z niego kontekst dla badge */
+.image-wrapper{
+  position: relative;              /* << kluczowe – badge liczy pozycję od wrappera */
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+.auction-image{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Badge stanu – nie nachodzi na tytuł, siedzi w rogu obrazka */
+.condition-badge{
+  position: absolute;
+  top: .5rem;
+  left: .5rem;
+  z-index: 2;
+  font-weight: 700;
+  font-size: clamp(.70rem, 1.5vw, .85rem);
+  padding: .25rem .55rem;
+  border-radius: .5rem;
+  color: #111;                     /* czytelny tekst na jasnych kolorach stanów */
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  line-height: 1;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+/* Treść karty */
+.auction-info{
+  padding: .9rem .9rem 0 .9rem;
+  text-align: left;
+}
+.auction-title{
+  margin: 0 0 .35rem 0;
+  font-size: clamp(1rem, 2.2vw, 1.1rem);
+  font-weight: 700;
+  color: #222;
+}
+.auction-price{
+  font-weight: 800;
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  margin-bottom: .2rem;
+}
+.auction-offers{
+  color: #6b7280;
+  font-size: .9rem;
+}
+
+/* Pasek końca aukcji */
+.auction-end{
+  background: #e74c3c;
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+  padding: .55rem .75rem;
+  border-top: 1px solid rgba(0,0,0,.05);
+  border-bottom-left-radius: .75rem;
+  border-bottom-right-radius: .75rem;
+  font-size: clamp(.8rem, 1.8vw, .9rem);
 }
 </style>
+

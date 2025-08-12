@@ -71,7 +71,15 @@ function logout() {
 
 <style scoped>
 .admin-dropdown { position: relative; display:inline-block; }
-.dropdown-menu { position:absolute; right:0; background:#fff; border:1px solid #c9d3dd; display:flex; flex-direction:column; }
+.dropdown-menu { 
+  position:absolute; 
+  right:0; 
+  background:#fff; 
+  border:1px solid #c9d3dd; 
+  display:flex; 
+  flex-direction:column;
+  border-radius: 1vh;
+}
 .dropdown-menu a { padding:6px 12px; white-space:nowrap; }
 .login-button{
   justify-content: center;

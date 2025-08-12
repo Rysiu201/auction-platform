@@ -96,14 +96,14 @@ function onExtras(e: Event) {
             <option value="DO_NAPRAWY">Do naprawy</option>
           </select>
         </label>
-        <label><input type="checkbox" v-model="personalPickup" /> Odbiór osobisty</label>
-        <label><input type="checkbox" v-model="courierShipping" /> Wysyłka kurierem</label>
-        <label><input type="checkbox" v-model="invoice" /> Faktura dostępna</label>
-        <label>Główne zdjęcie: <input type="file" @change="onMain" /></label>
+        <label class="check-line"><input type="checkbox" v-model="personalPickup" /> Odbiór osobisty</label>
+        <label class="check-line"><input type="checkbox" v-model="courierShipping" /> Wysyłka kurierem</label>
+        <label class="check-line"><input type="checkbox" v-model="invoice" /> Faktura dostępna</label>
+        <label class="file-line">Główne zdjęcie: <input type="file" @change="onMain" /></label>
         <div class="preview-images" v-if="mainPreview">
           <img :src="mainPreview" />
         </div>
-        <label>Dodatkowe zdjęcia: <input type="file" multiple @change="onExtras" /></label>
+        <label class="file-line">Dodatkowe zdjęcia: <input type="file" multiple @change="onExtras" /></label>
         <div class="preview-images" v-if="extraPreviews.length">
           <img v-for="(src,i) in extraPreviews" :src="src" :key="i" />
         </div>
@@ -119,7 +119,137 @@ function onExtras(e: Event) {
 </template>
 
 <style scoped>
-.admin-navbar { padding:40px 20px; text-align:left; }
+/* --- kontener strony --- */
+.admin-dashboard{ padding: 0 16px; }
+.admin-layout{
+  display:grid;
+  grid-template-columns: 240px 1fr;
+  gap:24px;
+  align-items:start;
+  max-width: 1200px;        /* <<< szerokość strony w panelu */
+  margin: 24px auto;        /* <<< wyśrodkowanie */
+}
 
-.admin-nav { padding:40px 20px; text-align:left; }
+/* --- sidebar --- */
+.admin-nav{
+  background:#f5f7fa;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:16px;
+  position:sticky; top:24px;
+  height:fit-content;
+}
+.admin-nav ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.admin-nav a{ display:block; padding:10px 12px; border-radius:10px; color:#1f2937; text-decoration:none; font-weight:600; }
+.admin-nav a.router-link-active{ background:#e6f0ff; color:#0a4abf; }
+
+/* --- content --- */
+.admin-content{ display:flex; justify-content:center; align-items:flex-start; }
+.create-auction-wrapper{ width:100%; display:flex; justify-content:center; }
+.create-auction-card{
+  width:100%;
+  max-width: 820px;         /* <<< realistyczna szerokość formularza */
+  background:#fff;
+  border:1px solid #dbe2ea;
+  border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+  padding:24px;
+}
+.create-auction-card h2{ margin:0 0 16px; }
+
+/* --- formularz --- */
+.form{ display:grid; gap:12px; }
+.form-row{ display:grid; gap:12px; grid-template-columns: repeat(3, 1fr); }
+input, textarea, select{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #cfd8e3;
+  border-radius:8px;
+  font:inherit;
+  box-sizing:border-box;
+}
+textarea{ resize:vertical; min-height:100px; }
+label{ display:flex; align-items:center; gap:8px; }
+
+/* przyciski */
+button[type="submit"]{
+  background:#0059b3; color:#fff; border:0; padding:12px 16px;
+  border-radius:8px; font-weight:700; cursor:pointer;
+}
+button[disabled]{ opacity:.6; cursor:not-allowed; }
+
+/* podglądy */
+.preview-images{ display:flex; gap:8px; flex-wrap:wrap; }
+.preview-images img{
+  width:120px; height:120px; object-fit:cover;
+  border-radius:8px; border:1px solid #e5e7eb;
+}
+
+/* --- RWD --- */
+@media (max-width: 1100px){
+  .admin-layout{ grid-template-columns: 200px 1fr; }
+}
+@media (max-width: 900px){
+  .admin-layout{ grid-template-columns: 1fr; }
+  .admin-nav{ position:static; }
+  .form-row{ grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px){
+  .form-row{ grid-template-columns: 1fr; } /* na telefonie jedna kolumna */
+}
+
+/* --- Checkboksy: spójne z wyglądem, równe odstępy --- */
+.check-line{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-weight: 500;
+  color: #374151;
+}
+.check-line input[type="checkbox"]{
+  width: 18px;
+  height: 18px;
+  accent-color: #0059b3;     /* brandowy kolor */
+  cursor: pointer;
+}
+
+/* --- Pola plików: label + pole w jednej linii, ładny przycisk --- */
+.file-line{
+  display: grid;
+  grid-template-columns: 160px 1fr;   /* tekst etykiety | kontrolka */
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  color: #374151;
+  font-weight: 500;
+}
+.file-line input[type="file"]{
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  box-sizing: border-box;
+}
+.file-line input[type="file"]::file-selector-button{
+  margin-right: 10px;
+  padding: 8px 12px;
+  border: 1px solid #0059b3;
+  background: #0059b3;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color .2s, border-color .2s;
+}
+.file-line input[type="file"]::file-selector-button:hover{
+  background: #004a99;
+  border-color: #004a99;
+}
+
+/* dopasowanie podpisów po lewej (Główne/Dodatkowe zdjęcia) */
+.file-line { text-align: left; }
+
 </style>
+
