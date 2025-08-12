@@ -62,9 +62,9 @@ function logout() {
         </div>
         <router-link v-else to="/my-auctions" class="admin-link">Moje Aukcje</router-link>
       </div>
-      <router-link v-if="!user" to="/login">Zaloguj</router-link>
-      <span v-else class="welcome">Witaj, {{ user.name }}</span>
-      <button v-if="user" class="btn small logout-btn" @click="logout">Wyloguj</button>
+      <router-link class="login-button" v-if="!user" to="/login">Zaloguj</router-link>
+      <span v-else class="welcome">Witaj, <strong class="username">{{ user.name }}</strong></span>
+      <button v-if="user" class="btn logout-btn" @click="logout">Wyloguj</button>
     </div>
   </header>
 </template>
@@ -73,4 +73,30 @@ function logout() {
 .admin-dropdown { position: relative; display:inline-block; }
 .dropdown-menu { position:absolute; right:0; background:#fff; border:1px solid #c9d3dd; display:flex; flex-direction:column; }
 .dropdown-menu a { padding:6px 12px; white-space:nowrap; }
+.login-button{
+  justify-content: center;
+  display: flex;
+  background: #0059b3;
+  border-color: #0059b3;
+  align-items: center;
+  width: 5vh;
+  height: 2.5vh;
+  margin-left: 1vh;
+  margin-right: 1vh;
+  border-radius: 1vh;
+  border-width: 0.2vh;
+  border-style: none;
+  border-color: black;
+  text-align: center;
+  color: white;
+}
+
+.login-button:hover {
+  background: #0073e6;
+  border-color: #0073e6;
+}
+
+.username{
+  font-weight: bold;
+}
 </style>

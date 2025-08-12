@@ -118,7 +118,7 @@ const conditionColor: Record<string, string> = {
 <template>
   <section class="home-hero">
     <h1 class="welcome">
-      Witamy na Aukcji Sprzętu
+      <strong>Witamy na Aukcji Sprzętu</strong>
       <span class="brand inline-brand">
         <span class="logo-alt">alt</span>
         <span class="logo-box"><span class="logo-k">kom</span></span>
@@ -159,7 +159,7 @@ const conditionColor: Record<string, string> = {
       </router-link>
     </div>
 
-    <div class="next-auctions">Następna Pula Aukcji:</div>
+    <div class="next-auctions"><strong>Następna Pula Aukcji:</strong></div>
 
     <p v-if="!hasSchedule" class="no-schedule">
       Termin nie został jeszcze wyznaczony.
