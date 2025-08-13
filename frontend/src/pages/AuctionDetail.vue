@@ -349,7 +349,7 @@ onUnmounted(() => {
           <div class="mt-1 text-4xl font-bold">{{ toPLN(topAmount) }} PLN</div>
         </div>
 
-        <div class="flex items-center gap-2 rounded-lg bg-amber-50 text-amber-900 px-3 py-2">
+        <div v-if="auction.status !== 'ENDED' && hasStarted" class="flex items-center gap-2 rounded-lg bg-amber-50 text-amber-900 px-3 py-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="w-4 h-4"
