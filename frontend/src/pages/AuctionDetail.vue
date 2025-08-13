@@ -270,7 +270,7 @@ onUnmounted(() => {
                  backdrop-blur transition hover:bg-slate-800 focus:outline-none
                  focus-visible:ring-2 focus-visible:ring-sky-400"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="18" height="18" viewBox="9 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 18L9 12l6-6"/>
           </svg>
         </button>
@@ -311,13 +311,11 @@ onUnmounted(() => {
                  focus-visible:ring-2 focus-visible:ring-sky-400"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M0 6l6 6-6 6"/>
           </svg>
         </button>
 
         <!-- gradienty na brzegach -->
-        <div class="pointer-events-none absolute inset-y-0 left-0 w-10 rounded-l-xl bg-gradient-to-r from-white/80 to-transparent"></div>
-        <div class="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-xl bg-gradient-to-l from-white/80 to-transparent"></div>
       </div>
     </div>
 

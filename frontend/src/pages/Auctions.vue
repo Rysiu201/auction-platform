@@ -126,16 +126,6 @@ async function toggleFavorite(a: Auction, e: Event) {
       class="auction-link"
     >
       <article class="auction-card">
-        <button
-          v-if="user"
-          class="fav-btn"
-          @click="toggleFavorite(a, $event)"
-          :class="
-            isFavorite(a.id)
-              ? 'text-amber-400 hover:text-amber-500'
-              : 'text-slate-400 hover:text-slate-500'
-          "
-        >★</button>
         <div class="image-wrapper">
           <img
             v-if="a.images?.[0]"
@@ -272,4 +262,3 @@ async function toggleFavorite(a: Auction, e: Event) {
   font-size: clamp(.8rem, 1.8vw, .9rem);
 }
 </style>
-
