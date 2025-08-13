@@ -15,6 +15,8 @@ const msg = ref<string | null>(null);
 const currentImg = ref(0);
 const previewUrl = ref<string | null>(null);
 const timeLeft = ref(0);
+const user = ref<any>(null);
+const isFavorite = ref(false);
 const conditionLabel: Record<string, string> = {
   NOWY: 'Nowy',
   BARDZO_DOBRY: 'Bardzo dobry',
@@ -29,6 +31,12 @@ const conditionColor: Record<string, string> = {
   DOBRY: '#FFFF00',
   BARDZO_DOBRY: '#00FFFF',
   NOWY: '#008000',
+};
+
+const statusColor: Record<string, string> = {
+  ACTIVE: 'bg-green-500',
+  ENDED: 'bg-red-500',
+  SCHEDULED: 'bg-yellow-500',
 };
 
 let pollTimer: number | undefined;
@@ -54,6 +62,49 @@ function updateTimeLeft() {
 
 function toPLN(g: number) {
   return (g / 100).toFixed(2);
+}
+
+function statusClass(s: string) {
+  return statusColor[s] || 'bg-gray-400';
+}
+
+function loadUser() {
+  const raw = localStorage.getItem('user');
+  user.value = raw ? JSON.parse(raw) : null;
+}
+
+async function loadFavoriteStatus() {
+  if (!user.value) return;
+  try {
+    const { data } = await api.get('/auctions/my');
+    isFavorite.value = data.some((a: any) => a.id === id);
+  } catch {}
+}
+
+function onUserChange() {
+  loadUser();
+  loadFavoriteStatus();
+}
+
+async function toggleFavorite() {
+  if (!user.value) return;
+  if (isFavorite.value) {
+    await api.delete(`/auctions/${id}/favorite`);
+    isFavorite.value = false;
+  } else {
+    await api.post(`/auctions/${id}/favorite`);
+    isFavorite.value = true;
+  }
+}
+
+function nextImage() {
+  if (!auction.value?.images?.length) return;
+  currentImg.value = (currentImg.value + 1) % auction.value.images.length;
+}
+
+function prevImage() {
+  if (!auction.value?.images?.length) return;
+  currentImg.value = (currentImg.value - 1 + auction.value.images.length) % auction.value.images.length;
 }
 
 async function loadFull() {
@@ -95,15 +146,19 @@ async function placeBid() {
 }
 
 onMounted(async () => {
+  loadUser();
   await loadFull();
+  await loadFavoriteStatus();
   updateTimeLeft();
   pollTimer = window.setInterval(pollTop, 2000);
   countTimer = window.setInterval(updateTimeLeft, 1000);
+  window.addEventListener('user-change', onUserChange);
 });
 
 onUnmounted(() => {
   if (pollTimer) window.clearInterval(pollTimer);
   if (countTimer) window.clearInterval(countTimer);
+  window.removeEventListener('user-change', onUserChange);
 });
 
 function openPreview(i: number) {
@@ -117,187 +172,67 @@ function closePreview() {
 </script>
 
 <template>
-  <div v-if="auction" class="auction-detail">
-    <div class="gallery">
+  <div v-if="auction" class="max-w-5xl mx-auto p-4 flex flex-col md:flex-row gap-8">
+    <div class="flex-1">
       <img
         v-if="auction.images?.[currentImg]"
         :src="`${backend}${auction.images[currentImg].url}`"
         alt=""
-        class="main-image"
+        class="w-full rounded-lg object-cover cursor-zoom-in"
         @click="openPreview(currentImg)"
       />
-      <div v-if="auction.images?.length > 1" class="thumbs">
-        <img
-          v-for="(img, i) in auction.images"
-          :key="img.url"
-          :src="`${backend}${img.url}`"
-          :class="['thumb', { active: i === currentImg }]"
-          @click="currentImg = i; openPreview(i)"
-        />
+      <div v-if="auction.images?.length > 1" class="flex items-center gap-2 mt-4">
+        <button @click="prevImage" class="px-2 py-1 border rounded">&lt;</button>
+        <div class="flex overflow-x-auto gap-2">
+          <img
+            v-for="(img, i) in auction.images"
+            :key="img.url"
+            :src="`${backend}${img.url}`"
+            @click="currentImg = i"
+            :class="['h-20 w-20 object-cover rounded cursor-pointer border-2', i === currentImg ? 'border-blue-500' : 'border-transparent']"
+          />
+        </div>
+        <button @click="nextImage" class="px-2 py-1 border rounded">&gt;</button>
       </div>
     </div>
-    <div class="bid-panel">
-      <h1 class="auction-title">{{ auction.title }}</h1>
-      <span class="detail-condition" :style="{ background: conditionColor[auction.condition] }">
+    <div class="w-full md:w-96 flex flex-col gap-4">
+      <div class="flex justify-between items-start">
+        <h1 class="text-2xl font-bold">{{ auction.title }}</h1>
+        <button v-if="user" class="text-2xl" @click="toggleFavorite">{{ isFavorite ? '★' : '☆' }}</button>
+      </div>
+      <span class="text-white text-xs font-semibold px-2 py-1 rounded" :class="statusClass(auction.status)">{{ auction.status }}</span>
+      <span class="self-start text-xs font-semibold px-2 py-1 rounded" :style="{ background: conditionColor[auction.condition] }">
         {{ conditionLabel[auction.condition] || auction.condition }}
       </span>
-      <p class="auction-desc">{{ auction.description }}</p>
-      <div class="price-box">
-        <span class="label">Aktualna oferta</span>
-        <div class="price">{{ toPLN(topAmount) }} PLN</div>
+      <p class="text-gray-700">{{ auction.description }}</p>
+      <div>
+        <div class="text-sm text-gray-500">Aktualna oferta</div>
+        <div class="text-3xl font-bold">{{ toPLN(topAmount) }} PLN</div>
       </div>
-      <div class="timer">Start: {{ new Date(auction.startsAt).toLocaleString() }}</div>
-      <div class="timer">Koniec: {{ new Date(auction.endsAt).toLocaleString() }}</div>
-      <div v-if="hasStarted && auction.status !== 'ENDED'" class="timer">Pozostało: {{ formattedTimeLeft }}</div>
-      <div v-if="auction.status !== 'ENDED' && hasStarted" class="bid-form">
-        <input v-model="myBidPLN" type="number" step="0.01" placeholder="Twoja oferta (PLN)" />
-        <button @click="placeBid">Licytuj</button>
-        <p class="bid-hint">Min. przebicie: {{ toPLN(auction.minIncrement) }} PLN</p>
+      <div class="space-y-1 text-sm">
+        <div>📅 Start: {{ new Date(auction.startsAt).toLocaleString() }}</div>
+        <div>📅 Koniec: {{ new Date(auction.endsAt).toLocaleString() }}</div>
+        <div v-if="hasStarted && auction.status !== 'ENDED'">🕒 Pozostało: {{ formattedTimeLeft }}</div>
       </div>
-      <p v-else-if="auction.status !== 'ENDED'" class="not-started">Aukcja jeszcze się nie rozpoczęła.</p>
-      <div class="extra-info">
-        <h3>Dodatkowe Informacje</h3>
-        <ul class="options">
-          <li v-if="auction.personalPickup">Odbiór osobisty</li>
-          <li v-if="auction.courierShipping">Wysyłka kurierem</li>
-          <li>Faktura: {{ auction.invoice ? 'możliwa' : 'brak' }}</li>
+      <div v-if="auction.status !== 'ENDED' && hasStarted" class="flex flex-col gap-2">
+        <input v-model="myBidPLN" type="number" step="0.01" placeholder="Twoja oferta (PLN)" class="border rounded p-2" />
+        <button @click="placeBid" class="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Licytuj</button>
+        <p class="text-sm text-gray-500">Min. przebicie: {{ toPLN(auction.minIncrement) }} PLN</p>
+      </div>
+      <p v-else-if="auction.status !== 'ENDED'" class="text-gray-500">Aukcja jeszcze się nie rozpoczęła.</p>
+      <div class="border rounded p-4 bg-gray-50">
+        <h3 class="font-semibold mb-2 text-center">Dodatkowe Informacje</h3>
+        <ul class="space-y-1 text-gray-600">
+          <li v-if="auction.personalPickup">🚗 Odbiór osobisty</li>
+          <li v-if="auction.courierShipping">📦 Wysyłka kurierem</li>
+          <li>🧾 Faktura: {{ auction.invoice ? 'możliwa' : 'brak' }}</li>
         </ul>
       </div>
-      <p v-if="msg" class="error">{{ msg }}</p>
+      <p v-if="msg" class="text-red-600">{{ msg }}</p>
     </div>
   </div>
   <p v-else>Ładowanie…</p>
-  <div v-if="previewUrl" class="img-preview" @click="closePreview">
-    <img :src="previewUrl" alt="" />
+  <div v-if="previewUrl" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50" @click="closePreview">
+    <img :src="previewUrl" alt="" class="max-w-full max-h-full object-contain" />
   </div>
 </template>
-
-<style scoped>
-.auction-desc {
-  color: black
-}
-.auction-detail {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  gap: 24px;
-}
-.gallery {
-  flex: 1;
-}
-.main-image {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: 12px;
-  cursor: zoom-in;
-}
-.thumbs {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-.thumb {
-  width: 72px;
-  height: 72px;
-  object-fit: cover;
-  border-radius: 8px;
-  cursor: zoom-in;
-  opacity: 0.7;
-  transition: transform 0.2s, opacity 0.2s;
-}
-.thumb:hover {
-  transform: scale(1.02);
-  opacity: 1;
-}
-.thumb.active {
-  border: 2px solid #ff4f64;
-  opacity: 1;
-}
-.bid-panel {
-  width: 100%;
-  max-width: 420px;
-  position: sticky;
-  top: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.auction-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-}
-.detail-condition {
-  align-self: flex-start;
-  color: rgb(0, 0, 0);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 700;
-}
-.price-box .label {
-  font-size: 14px;
-  color: #6b7280;
-}
-.price-box .price {
-  font-size: 32px;
-  font-weight: 700;
-}
-.timer {
-  font-family: monospace;
-  font-weight: 600;
-}
-.bid-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.bid-form input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.options {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: #6b7280;
-}
-.extra-info {
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 8px;
-  background: #f9f9f9;
-}
-.extra-info h3 {
-  margin: 0 0 8px;
-  text-align: center;
-}
-.not-started {
-  color: #6b7280;
-}
-.error {
-  color: red;
-}
-
-.img-preview {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-.img-preview img {
-  max-width: 90%;
-  max-height: 90%;
-  object-fit: contain;
-}
-</style>
