@@ -247,75 +247,77 @@ onUnmounted(() => {
   <div v-if="auction" class="max-w-7xl mx-auto p-4 lg:p-6 flex flex-col lg:flex-row gap-6">
     <!-- Left column -->
     <div class="flex-1">
-      <div
-        class="relative bg-gray-100 rounded-xl shadow flex items-center justify-center cursor-zoom-in"
-        @click="openPreview(currentImg)"
-      >
-        <img
-          v-if="auction.images?.[currentImg]"
-          :src="`${backend}${auction.images[currentImg].url}`"
-          alt=""
-          class="max-h-[480px] w-full object-contain rounded-xl"
-        />
-      </div>
-
-      <!-- GALERIA MINIATUREK -->
-      <div v-if="auction.images?.length > 1" class="relative mt-4 select-none">
-        <!-- lewa -->
-        <button
-          aria-label="Poprzednie zdjęcie"
-          @click="prevImage(); scrollThumbs('left')"
-          class="absolute left-1 top-1/2 -translate-y-1/2 z-10 grid place-items-center
-                 h-9 w-9 rounded-full bg-slate-800/85 text-white shadow-md ring-1 ring-white/15
-                 backdrop-blur transition hover:bg-slate-800 focus:outline-none
-                 focus-visible:ring-2 focus-visible:ring-sky-400"
-        >
-          <svg width="18" height="18" viewBox="9 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 18L9 12l6-6"/>
-          </svg>
-        </button>
-
-        <!-- pasek miniaturek -->
+      <div class="rounded-2xl bg-white/80 backdrop-blur shadow-lg p-4">
         <div
-          ref="thumbsRef"
-          class="flex gap-3 overflow-x-auto scroll-smooth px-12 py-2"
-          style="-webkit-overflow-scrolling: touch;"
+          class="relative bg-gray-100 rounded-xl flex items-center justify-center cursor-zoom-in"
+          @click="openPreview(currentImg)"
         >
-          <button
-            v-for="(img, i) in auction.images"
-            :key="img.url || i"
-            :ref="el => el && (thumbRefs[i] = el as HTMLElement)"
-            @click="setActive(i)"
-            :data-active="i === currentImg"
-            class="relative shrink-0 aspect-square w-20 md:w-24 overflow-hidden
-                   bg-transparent p-0 border-0 rounded-md
-                   focus:outline-none ring-0
-                   data-[active=true]:ring-2 data-[active=true]:ring-sky-500 data-[active=true]:ring-offset-2 data-[active=true]:ring-offset-white"
-          >
-            <img
-              :src="`${backend}${img.url}`"
-              :alt="img.alt || `Zdjęcie ${i+1}`"
-              class="block h-full w-full object-cover select-none"
-              draggable="false"
-            />
-          </button>
+          <img
+            v-if="auction.images?.[currentImg]"
+            :src="`${backend}${auction.images[currentImg].url}`"
+            alt=""
+            class="max-h-[480px] w-full object-contain rounded-xl"
+          />
         </div>
 
-        <!-- prawa -->
-        <button
-          aria-label="Następne zdjęcie"
-          @click="nextImage(); scrollThumbs('right')"
-          class="absolute right-1 top-1/2 -translate-y-1/2 z-10 grid place-items-center
-                 h-9 w-9 rounded-full bg-slate-800/85 text-white shadow-md ring-1 ring-white/15
-                 backdrop-blur transition hover:bg-slate-800 focus:outline-none
-                 focus-visible:ring-2 focus-visible:ring-sky-400"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M0 6l6 6-6 6"/>
-          </svg>
-        </button>
+        <!-- GALERIA MINIATUREK -->
+        <div v-if="auction.images?.length > 1" class="mt-4">
+          <div class="relative select-none rounded-xl bg-white shadow p-2">
+            <!-- lewa -->
+            <button
+              aria-label="Poprzednie zdjęcie"
+              @click="prevImage(); scrollThumbs('left')"
+              class="absolute left-1 top-1/2 -translate-y-1/2 z-10 grid place-items-center
+                     h-9 w-9 rounded-full bg-slate-800/85 text-white shadow-md ring-1 ring-white/15
+                     backdrop-blur transition hover:bg-slate-800 focus:outline-none
+                     focus-visible:ring-2 focus-visible:ring-sky-400"
+            >
+              <svg width="18" height="18" viewBox="9 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 18L9 12l6-6"/>
+              </svg>
+            </button>
 
-        <!-- gradienty na brzegach -->
+            <!-- pasek miniaturek -->
+            <div
+              ref="thumbsRef"
+              class="flex gap-3 overflow-x-auto scroll-smooth px-12 py-2"
+              style="-webkit-overflow-scrolling: touch;"
+            >
+              <button
+                v-for="(img, i) in auction.images"
+                :key="img.url || i"
+                :ref="el => el && (thumbRefs[i] = el as HTMLElement)"
+                @click="setActive(i)"
+                :data-active="i === currentImg"
+                class="relative shrink-0 aspect-square w-20 md:w-24 overflow-hidden
+                       bg-transparent p-0 border-0 rounded-md
+                       focus:outline-none ring-0
+                       data-[active=true]:ring-2 data-[active=true]:ring-sky-500 data-[active=true]:ring-offset-2 data-[active=true]:ring-offset-white"
+              >
+                <img
+                  :src="`${backend}${img.url}`"
+                  :alt="img.alt || `Zdjęcie ${i+1}`"
+                  class="block h-full w-full object-cover select-none"
+                  draggable="false"
+                />
+              </button>
+            </div>
+
+            <!-- prawa -->
+            <button
+              aria-label="Następne zdjęcie"
+              @click="nextImage(); scrollThumbs('right')"
+              class="absolute right-1 top-1/2 -translate-y-1/2 z-10 grid place-items-center
+                     h-9 w-9 rounded-full bg-slate-800/85 text-white shadow-md ring-1 ring-white/15
+                     backdrop-blur transition hover:bg-slate-800 focus:outline-none
+                     focus-visible:ring-2 focus-visible:ring-sky-400"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M0 6l6 6-6 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -336,7 +338,7 @@ onUnmounted(() => {
         </button>
 
         <!-- Badges -->
-        <div class="flex flex-wrap gap-4">
+        <div class="space-y-2">
           <div>
             <div class="text-xs text-slate-500 mb-1">Status aukcji:</div>
             <span :class="[badgeBase, auction.status === 'ENDED' ? badgeVariants.statusEnded : badgeVariants.statusActive]">
@@ -349,10 +351,12 @@ onUnmounted(() => {
               {{ conditionLabel[auction.condition] || auction.condition }}
             </span>
           </div>
-          <span v-if="auction.featured" :class="[badgeBase, badgeVariants.featured]">
+          <div v-if="auction.featured">
+            <span :class="[badgeBase, badgeVariants.featured]">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 0 0-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 0 0-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 0 0-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 0 0 .95-.69l1.286-3.967z"/></svg>
             Wyróżniona
-          </span>
+            </span>
+          </div>
         </div>
 
         <h2 class="text-2xl font-bold">{{ auction.title }}</h2>
@@ -390,21 +394,27 @@ onUnmounted(() => {
         </div>
         <p v-else-if="auction.status !== 'ENDED'" class="text-gray-500">Aukcja jeszcze się nie rozpoczęła.</p>
 
-        <div v-if="shippingOptionsCount"
-             class="grid gap-2 pt-2"
-             :class="{
-               'grid-cols-1': shippingOptionsCount === 1,
-               'grid-cols-2': shippingOptionsCount === 2,
-               'grid-cols-3': shippingOptionsCount === 3,
-             }">
-          <div v-if="auction.personalPickup" class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-            <span>🚗</span><span class="text-xs mt-1">Odbiór Osobisty</span>
-          </div>
-          <div v-if="auction.courierShipping" class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-            <span>📦</span><span class="text-xs mt-1">Wysyłka Kurierem</span>
-          </div>
-          <div v-if="auction.invoice" class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
-            <span>🧾</span><span class="text-xs mt-1">Moźliwa Faktura</span>
+        <div v-if="shippingOptionsCount" class="pt-4">
+          <div class="rounded-xl bg-gray-50 p-4">
+            <div class="text-sm font-medium mb-2">Dodatkowe Informacje</div>
+            <div
+              class="grid gap-2"
+              :class="{
+                'grid-cols-1': shippingOptionsCount === 1,
+                'grid-cols-2': shippingOptionsCount === 2,
+                'grid-cols-3': shippingOptionsCount === 3,
+              }"
+            >
+              <div v-if="auction.personalPickup" class="flex flex-col items-center p-3 bg-white rounded-lg">
+                <span>🚗</span><span class="text-xs mt-1">Odbiór Osobisty</span>
+              </div>
+              <div v-if="auction.courierShipping" class="flex flex-col items-center p-3 bg-white rounded-lg">
+                <span>📦</span><span class="text-xs mt-1">Wysyłka Kurierem</span>
+              </div>
+              <div v-if="auction.invoice" class="flex flex-col items-center p-3 bg-white rounded-lg">
+                <span>🧾</span><span class="text-xs mt-1">Możliwa Faktura</span>
+              </div>
+            </div>
           </div>
         </div>
 
