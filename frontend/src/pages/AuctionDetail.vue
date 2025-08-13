@@ -239,19 +239,19 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="auction" class="max-w-7xl mx-auto p-4 lg:p-6 flex flex-col lg:flex-row gap-6">
+  <div v-if="auction" class="max-w-7xl mx-auto p-4 lg:p-6 flex flex-col lg:flex-row lg:items-stretch gap-6">
     <!-- Left column -->
-    <div class="flex-1">
-      <div class="rounded-2xl bg-white/80 backdrop-blur shadow-lg p-4">
+    <div class="flex-1 flex">
+      <div class="rounded-2xl bg-white/80 backdrop-blur shadow-lg p-4 flex flex-col h-full">
         <div
-          class="relative bg-gray-100 rounded-xl flex items-center justify-center cursor-zoom-in"
+          class="relative bg-gray-100 rounded-xl flex items-center justify-center cursor-zoom-in h-[480px]"
           @click="openPreview(currentImg)"
         >
           <img
             v-if="auction.images?.[currentImg]"
             :src="`${backend}${auction.images[currentImg].url}`"
             alt=""
-            class="max-h-[480px] w-full object-contain rounded-xl"
+            class="h-full w-full object-contain rounded-xl"
           />
         </div>
 
@@ -312,8 +312,8 @@ onUnmounted(() => {
     </div>
 
     <!-- Right column -->
-    <div class="w-full lg:w-96">
-      <div class="relative rounded-2xl bg-white/80 backdrop-blur shadow-lg p-7 space-y-2 sticky top-24">
+    <div class="w-full lg:w-96 flex">
+      <div class="relative rounded-2xl bg-white/80 backdrop-blur shadow-lg p-7 space-y-2 sticky top-24 h-full flex flex-col">
         <!-- Ulubione -->
         <button
           v-if="user"
@@ -418,13 +418,13 @@ onUnmounted(() => {
   <!-- PREVIEW -->
   <div
     v-if="previewOpen"
-    class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 relative"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 relative"
     @click.self="closePreview"
   >
     <button
       aria-label="Zamknij podgląd"
       @click="closePreview"
-      class="absolute top-4 right-4 text-white"
+      class="absolute top-4 right-4 text-white bg-transparent p-2 focus:outline-none"
     >
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -434,7 +434,7 @@ onUnmounted(() => {
     <button
       aria-label="Poprzednie zdjęcie"
       @click.stop="prevImage"
-      class="absolute left-4 top-1/2 -translate-y-1/2 text-white"
+      class="absolute left-4 top-1/2 -translate-y-1/2 grid place-items-center h-10 w-10 rounded-full bg-slate-800/70 text-white shadow-md ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
     >
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 18L9 12l6-6"/>
@@ -445,13 +445,13 @@ onUnmounted(() => {
       v-if="auction.images?.[currentImg]"
       :src="`${backend}${auction.images[currentImg].url}`"
       alt=""
-      class="max-w-full max-h-full object-contain rounded-lg"
+      class="max-w-[90vw] max-h-[80vh] object-contain rounded-lg"
     />
 
     <button
       aria-label="Następne zdjęcie"
       @click.stop="nextImage"
-      class="absolute right-4 top-1/2 -translate-y-1/2 text-white"
+      class="absolute right-4 top-1/2 -translate-y-1/2 grid place-items-center h-10 w-10 rounded-full bg-slate-800/70 text-white shadow-md ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
     >
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/>
