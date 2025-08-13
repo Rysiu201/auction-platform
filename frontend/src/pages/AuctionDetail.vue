@@ -313,7 +313,7 @@ onUnmounted(() => {
 
     <!-- Right column -->
     <div class="w-full lg:w-96">
-      <div class="relative rounded-2xl bg-white/80 backdrop-blur shadow-lg p-6 space-y-4 sticky top-24">
+      <div class="relative rounded-2xl bg-white/80 backdrop-blur shadow-lg p-7 space-y-2 sticky top-24">
         <!-- Ulubione -->
         <button
           v-if="user"
