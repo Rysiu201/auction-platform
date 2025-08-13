@@ -196,13 +196,13 @@ function closePreview() {
       </div>
     </div>
     <div class="w-full md:w-96 flex flex-col gap-4">
+      <span class="text-white text-xs font-semibold px-2 py-1 rounded" :class="statusClass(auction.status)">{{ auction.status }}</span>
       <div class="flex justify-between items-start">
         <h1 class="text-2xl font-bold">{{ auction.title }}</h1>
         <button v-if="user" class="text-2xl" @click="toggleFavorite">{{ isFavorite ? '★' : '☆' }}</button>
       </div>
-      <span class="text-white text-xs font-semibold px-2 py-1 rounded" :class="statusClass(auction.status)">{{ auction.status }}</span>
       <span class="self-start text-xs font-semibold px-2 py-1 rounded" :style="{ background: conditionColor[auction.condition] }">
-        {{ conditionLabel[auction.condition] || auction.condition }}
+      {{ conditionLabel[auction.condition] || auction.condition }}
       </span>
       <p class="text-gray-700">{{ auction.description }}</p>
       <div>
