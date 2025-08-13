@@ -20,14 +20,14 @@ const auctions = ref<Auction[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const user = ref<any>(null);
-const myIds = ref<Set<string>>(new Set());
+const favoriteIds = ref<Set<string>>(new Set());
 let refresh: number | null = null;
 
 function loadUser() {
   const raw = localStorage.getItem("user");
   user.value = raw ? JSON.parse(raw) : null;
 }
-function onUserChange() { loadUser(); loadMy(); }
+function onUserChange() { loadUser(); loadFavorites(); }
 
 async function loadAuctions() {
   try {
@@ -40,19 +40,19 @@ async function loadAuctions() {
   }
 }
 
-async function loadMy() {
+async function loadFavorites() {
   if (!user.value) return;
   try {
     const { data } = await api.get("/auctions/my");
-    myIds.value = new Set(data.map((a: any) => a.id));
+    favoriteIds.value = new Set(data.map((a: any) => a.id));
   } catch {}
 }
 
 onMounted(async () => {
   loadUser();
   await loadAuctions();
-  await loadMy();
-  refresh = window.setInterval(() => { loadAuctions(); loadMy(); }, 5000);
+  await loadFavorites();
+  refresh = window.setInterval(() => { loadAuctions(); loadFavorites(); }, 5000);
   window.addEventListener("user-change", onUserChange);
 });
 
@@ -90,20 +90,20 @@ function currentPrice(a: Auction) {
   return fmtPrice(Math.max(a.basePrice, top));
 }
 
-function isMine(id: string) {
-  return myIds.value.has(id);
+function isFavorite(id: string) {
+  return favoriteIds.value.has(id);
 }
 
 async function toggleFavorite(a: Auction, e: Event) {
   e.preventDefault();
   e.stopPropagation();
   if (!user.value) return;
-  if (isMine(a.id)) {
+  if (isFavorite(a.id)) {
     await api.delete(`/auctions/${a.id}/favorite`);
-    myIds.value.delete(a.id);
+    favoriteIds.value.delete(a.id);
   } else {
     await api.post(`/auctions/${a.id}/favorite`);
-    myIds.value.add(a.id);
+    favoriteIds.value.add(a.id);
   }
 }
 </script>
@@ -130,7 +130,7 @@ async function toggleFavorite(a: Auction, e: Event) {
           v-if="user"
           class="fav-btn"
           @click="toggleFavorite(a, $event)"
-        >{{ isMine(a.id) ? '★' : '☆' }}</button>
+        >{{ isFavorite(a.id) ? '★' : '☆' }}</button>
         <div class="image-wrapper">
           <img
             v-if="a.images?.[0]"
