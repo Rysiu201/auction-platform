@@ -418,13 +418,13 @@ onUnmounted(() => {
   <!-- PREVIEW -->
   <div
     v-if="previewOpen"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 relative"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm relative"
     @click.self="closePreview"
   >
     <button
       aria-label="Zamknij podgląd"
       @click="closePreview"
-      class="absolute top-4 right-4 text-white bg-transparent p-2 focus:outline-none"
+      class="absolute top-6 right-6 z-10 grid h-10 w-10 place-items-center rounded-full bg-slate-900/70 text-white shadow-md ring-1 ring-white/15 transition hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
     >
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -434,9 +434,9 @@ onUnmounted(() => {
     <button
       aria-label="Poprzednie zdjęcie"
       @click.stop="prevImage"
-      class="absolute left-4 top-1/2 -translate-y-1/2 grid place-items-center h-10 w-10 rounded-full bg-slate-800/70 text-white shadow-md ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+      class="absolute left-6 top-1/2 -translate-y-1/2 z-10 grid h-12 w-12 place-items-center rounded-full bg-slate-900/70 text-white shadow-md ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
     >
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 18L9 12l6-6"/>
       </svg>
     </button>
@@ -451,9 +451,9 @@ onUnmounted(() => {
     <button
       aria-label="Następne zdjęcie"
       @click.stop="nextImage"
-      class="absolute right-4 top-1/2 -translate-y-1/2 grid place-items-center h-10 w-10 rounded-full bg-slate-800/70 text-white shadow-md ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+      class="absolute right-6 top-1/2 -translate-y-1/2 z-10 grid h-12 w-12 place-items-center rounded-full bg-slate-900/70 text-white shadow-md ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
     >
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/>
       </svg>
     </button>
