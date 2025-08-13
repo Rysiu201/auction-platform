@@ -209,9 +209,6 @@ onMounted(load);
 </template>
 
 <style scoped>
-.admin-layout{ display:flex; gap:24px; }
-.admin-nav ul{ list-style:none; padding:0; margin:0; }
-.admin-nav a{ display:block; padding:8px 0; color:#0f3a5a; }
 .form{ display:grid; gap:14px; max-width:460px; }
 .form label{ display:grid; gap:6px; color:#334; font-weight:600; }
 input{ padding:10px 12px; border:1px solid #c9d3dd; border-radius:8px; }
@@ -223,6 +220,4 @@ input{ padding:10px 12px; border:1px solid #c9d3dd; border-radius:8px; }
 .msg.ok{ color:#0b7a0b; }
 .msg.err{ color:#b00020; }
 .hint{ margin-top:6px; color:#456; }
-.admin-navbar { padding:40px 20px; text-align:left; }
-.admin-nav { padding:40px 20px; text-align:left; }
 </style>

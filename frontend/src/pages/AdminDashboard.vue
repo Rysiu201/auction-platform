@@ -278,8 +278,5 @@ async function deleteAuction(id: string) {
 </template>
 
 <style scoped>
-.admin-navbar { padding:40px 20px; text-align:left; }
-
-.admin-nav { padding:40px 20px; text-align:left; }
 </style>
 

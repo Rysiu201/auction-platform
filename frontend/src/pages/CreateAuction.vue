@@ -119,32 +119,6 @@ function onExtras(e: Event) {
 </template>
 
 <style scoped>
-/* --- kontener strony --- */
-.admin-dashboard{ padding: 0 16px; }
-.admin-layout{
-  display:grid;
-  grid-template-columns: 240px 1fr;
-  gap:24px;
-  align-items:start;
-  max-width: 1200px;        /* <<< szerokość strony w panelu */
-  margin: 24px auto;        /* <<< wyśrodkowanie */
-}
-
-/* --- sidebar --- */
-.admin-nav{
-  background:#f5f7fa;
-  border:1px solid #e5e7eb;
-  border-radius:12px;
-  padding:16px;
-  position:sticky; top:24px;
-  height:fit-content;
-}
-.admin-nav ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
-.admin-nav a{ display:block; padding:10px 12px; border-radius:10px; color:#1f2937; text-decoration:none; font-weight:600; }
-.admin-nav a.router-link-active{ background:#e6f0ff; color:#0a4abf; }
-
-/* --- content --- */
-.admin-content{ display:flex; justify-content:center; align-items:flex-start; }
 .create-auction-wrapper{ width:100%; display:flex; justify-content:center; }
 .create-auction-card{
   width:100%;
