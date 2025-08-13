@@ -7,15 +7,22 @@ const route = useRoute();
 const id = route.params.id as string;
 const backend = import.meta.env.VITE_BACKEND_URL as string;
 
-const thumbsRef = ref<HTMLDivElement | null>(null);
-const thumbRefs = ref<HTMLElement[]>([]); // refs do miniaturek
-
 const auction = ref<any>(null);
 const topAmount = ref(0); // grosze
 const bidAmount = ref<string>('');
 const msg = ref<string | null>(null);
 const currentImg = ref(0);
-const previewUrl = ref<string | null>(null);
+const previewOpen = ref(false);
+const thumbOffset = ref(0);
+const visibleThumbs = computed(() => {
+  if (!auction.value?.images) return [];
+  const imgs = auction.value.images;
+  const n = imgs.length;
+  return Array.from({ length: Math.min(4, n) }, (_, i) => {
+    const index = (thumbOffset.value + i) % n;
+    return { img: imgs[index], index };
+  });
+});
 const timeLeft = ref(0);
 const user = ref<any>(null);
 const isFavorite = ref(false);
@@ -103,55 +110,43 @@ function updateTimeLeft() {
   if (diff <= 0 && countTimer) window.clearInterval(countTimer);
 }
 
-// przewijanie paska miniaturek o krok (gdy overflow)
-function scrollThumbs(dir: 'left'|'right') {
-  const el = thumbsRef.value;
-  if (!el) return;
-  const first = el.querySelector<HTMLButtonElement>('button');
-  const gap = parseFloat(getComputedStyle(el).columnGap || getComputedStyle(el).gap || '0') || 12;
-  const step = first ? first.getBoundingClientRect().width + gap : 160;
-  el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
-}
-
-// przewinięcie aktywnej miniatury w widok (centrowanie)
-function scrollActiveThumbIntoView() {
-  const el = thumbsRef.value;
-  const btn = thumbRefs.value[currentImg.value];
-  if (!el || !btn) return;
-  btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-}
-
 function setActive(i: number) {
   currentImg.value = i;
-  scrollActiveThumbIntoView();
+  thumbOffset.value = i;
 }
 
 function prevImage() {
   if (!auction.value?.images?.length) return;
-  currentImg.value =
-    (currentImg.value - 1 + auction.value.images.length) % auction.value.images.length;
-  scrollActiveThumbIntoView();
+  const n = auction.value.images.length;
+  currentImg.value = (currentImg.value - 1 + n) % n;
+  thumbOffset.value = currentImg.value;
 }
 
 function nextImage() {
   if (!auction.value?.images?.length) return;
-  currentImg.value = (currentImg.value + 1) % auction.value.images.length;
-  scrollActiveThumbIntoView();
+  const n = auction.value.images.length;
+  currentImg.value = (currentImg.value + 1) % n;
+  thumbOffset.value = currentImg.value;
 }
 
 function onKey(e: KeyboardEvent) {
-  if (e.key === 'Escape' && previewUrl.value) {
+  if (!previewOpen.value) return;
+  if (e.key === 'Escape') {
     closePreview();
+  } else if (e.key === 'ArrowLeft') {
+    prevImage();
+  } else if (e.key === 'ArrowRight') {
+    nextImage();
   }
 }
 
-function openPreview(i: number) {
-  if (!auction.value) return;
-  previewUrl.value = `${backend}${auction.value.images[i].url}`;
+function openPreview(i?: number) {
+  if (typeof i === 'number') setActive(i);
+  previewOpen.value = true;
 }
 
 function closePreview() {
-  previewUrl.value = null;
+  previewOpen.value = false;
 }
 
 function loadUser() {
@@ -266,7 +261,7 @@ onUnmounted(() => {
             <!-- lewa -->
             <button
               aria-label="Poprzednie zdjęcie"
-              @click="prevImage(); scrollThumbs('left')"
+              @click="prevImage"
               class="absolute left-1 top-1/2 -translate-y-1/2 z-10 grid place-items-center
                      h-9 w-9 rounded-full bg-slate-800/85 text-white shadow-md ring-1 ring-white/15
                      backdrop-blur transition hover:bg-slate-800 focus:outline-none
@@ -278,25 +273,20 @@ onUnmounted(() => {
             </button>
 
             <!-- pasek miniaturek -->
-            <div
-              ref="thumbsRef"
-              class="flex gap-3 overflow-x-auto scroll-smooth px-12 py-2"
-              style="-webkit-overflow-scrolling: touch;"
-            >
+            <div class="flex gap-3 px-12 py-2 overflow-hidden">
               <button
-                v-for="(img, i) in auction.images"
-                :key="img.url || i"
-                :ref="el => el && (thumbRefs[i] = el as HTMLElement)"
-                @click="setActive(i)"
-                :data-active="i === currentImg"
+                v-for="t in visibleThumbs"
+                :key="t.index"
+                @click="setActive(t.index)"
+                :data-active="t.index === currentImg"
                 class="relative shrink-0 aspect-square w-20 md:w-24 overflow-hidden
                        bg-transparent p-0 border-0 rounded-md
                        focus:outline-none ring-0
                        data-[active=true]:ring-2 data-[active=true]:ring-sky-500 data-[active=true]:ring-offset-2 data-[active=true]:ring-offset-white"
               >
                 <img
-                  :src="`${backend}${img.url}`"
-                  :alt="img.alt || `Zdjęcie ${i+1}`"
+                  :src="`${backend}${t.img.url}`"
+                  :alt="t.img.alt || `Zdjęcie ${t.index+1}`"
                   class="block h-full w-full object-cover select-none"
                   draggable="false"
                 />
@@ -306,7 +296,7 @@ onUnmounted(() => {
             <!-- prawa -->
             <button
               aria-label="Następne zdjęcie"
-              @click="nextImage(); scrollThumbs('right')"
+              @click="nextImage"
               class="absolute right-1 top-1/2 -translate-y-1/2 z-10 grid place-items-center
                      h-9 w-9 rounded-full bg-slate-800/85 text-white shadow-md ring-1 ring-white/15
                      backdrop-blur transition hover:bg-slate-800 focus:outline-none
@@ -426,7 +416,46 @@ onUnmounted(() => {
   <p v-else>Ładowanie…</p>
 
   <!-- PREVIEW -->
-  <div v-if="previewUrl" class="fixed inset-0 bg-red/80 flex items-center justify-center z-50" @click="closePreview">
-    <img :src="previewUrl" alt="" class="max-w-full max-h-full object-contain" />
+  <div
+    v-if="previewOpen"
+    class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 relative"
+    @click.self="closePreview"
+  >
+    <button
+      aria-label="Zamknij podgląd"
+      @click="closePreview"
+      class="absolute top-4 right-4 text-white"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <button
+      aria-label="Poprzednie zdjęcie"
+      @click.stop="prevImage"
+      class="absolute left-4 top-1/2 -translate-y-1/2 text-white"
+    >
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 18L9 12l6-6"/>
+      </svg>
+    </button>
+
+    <img
+      v-if="auction.images?.[currentImg]"
+      :src="`${backend}${auction.images[currentImg].url}`"
+      alt=""
+      class="max-w-full max-h-full object-contain rounded-lg"
+    />
+
+    <button
+      aria-label="Następne zdjęcie"
+      @click.stop="nextImage"
+      class="absolute right-4 top-1/2 -translate-y-1/2 text-white"
+    >
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/>
+      </svg>
+    </button>
   </div>
 </template>
