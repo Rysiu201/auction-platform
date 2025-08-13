@@ -231,7 +231,12 @@ async function deleteAuction(id: string) {
                   <td>{{ fmtDate(a.startsAt) }}</td>
                   <td>{{ fmtDate(a.endsAt) }}</td>
                   <td>
-                    <button class="btn small relist-btn" @click="openRelist(a)">Wystaw ponownie</button>
+                    <button
+                      class="btn small relist-btn cursor-not-allowed opacity-50"
+                      disabled
+                    >
+                      Wystaw ponownie
+                    </button>
                     <button class="btn small delete-btn" @click="deleteAuction(a.id)">Usuń Aukcję</button>
                   </td>
                 </tr>

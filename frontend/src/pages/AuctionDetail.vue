@@ -26,12 +26,19 @@ const conditionLabel: Record<string, string> = {
   DO_NAPRAWY: 'Do naprawy',
 };
 
+const conditionColors: Record<string, string> = {
+  NOWY: 'bg-green-100 text-green-800',
+  BARDZO_DOBRY: 'bg-emerald-100 text-emerald-800',
+  DOBRY: 'bg-amber-100 text-amber-800',
+  USZKODZONY: 'bg-orange-100 text-orange-800',
+  DO_NAPRAWY: 'bg-red-100 text-red-800',
+};
+
 const badgeBase =
   'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium';
 const badgeVariants = {
   statusActive: 'bg-green-100 text-green-800',
   statusEnded: 'bg-slate-200 text-slate-700',
-  condition: 'bg-amber-100 text-amber-800',
   featured: 'bg-blue-100 text-blue-800',
 };
 
@@ -72,6 +79,15 @@ const canBid = computed(
     !isEnded.value &&
     hasStarted.value
 );
+
+const shippingOptionsCount = computed(() => {
+  if (!auction.value) return 0;
+  return [
+    auction.value.personalPickup,
+    auction.value.courierShipping,
+    auction.value.invoice,
+  ].filter(Boolean).length;
+});
 
 function toPLN(g: number) {
   return (g / 100).toFixed(2);
@@ -275,27 +291,22 @@ onUnmounted(() => {
           v-if="user"
           @click="toggleFavorite"
           aria-label="Dodaj do ulubionych"
-          class="absolute right-4 top-4 text-amber-400 hover:text-amber-500 transition-transform hover:scale-110 focus:outline-none"
+          class="absolute right-4 top-4 transition-transform hover:scale-110 focus:outline-none"
+          :class="
+            isFavorite
+              ? 'text-amber-400 hover:text-amber-500'
+              : 'text-slate-400 hover:text-slate-500'
+          "
         >
           <svg
-            v-if="isFavorite"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
             class="w-6 h-6"
           >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 0 0 .95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 0 0-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 0 0-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 0 0-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 0 0 .95-.69l1.286-3.967z" />
-          </svg>
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke-width="2"
-            stroke="currentColor"
-            class="w-6 h-6"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 0 0 .95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 0 0-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 0 0-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 0 0-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 0 0 .95-.69l1.286-3.967z" />
+            <path
+              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 0 0 .95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 0 0-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 0 0-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 0 0-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 0 0 .95-.69l1.286-3.967z"
+            />
           </svg>
         </button>
 
@@ -316,7 +327,12 @@ onUnmounted(() => {
           </div>
           <div>
             <div class="text-xs text-slate-500 mb-1">Stan sprzętu:</div>
-            <span :class="[badgeBase, badgeVariants.condition]">
+            <span
+              :class="[
+                badgeBase,
+                conditionColors[auction.condition] || 'bg-slate-100 text-slate-800',
+              ]"
+            >
               {{ conditionLabel[auction.condition] || auction.condition }}
             </span>
           </div>
@@ -395,20 +411,35 @@ onUnmounted(() => {
           Aukcja jeszcze się nie rozpoczęła.
         </p>
 
-        <div class="grid grid-cols-3 gap-2 pt-2">
-          <div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+        <div
+          v-if="shippingOptionsCount"
+          class="grid gap-2 pt-2"
+          :class="{
+            'grid-cols-1': shippingOptionsCount === 1,
+            'grid-cols-2': shippingOptionsCount === 2,
+            'grid-cols-3': shippingOptionsCount === 3,
+          }"
+        >
+          <div
+            v-if="auction.personalPickup"
+            class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+          >
             <span>🚗</span>
             <span class="text-xs mt-1">Odbiór</span>
           </div>
-          <div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+          <div
+            v-if="auction.courierShipping"
+            class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+          >
             <span>📦</span>
             <span class="text-xs mt-1">Kurier</span>
           </div>
-          <div class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+          <div
+            v-if="auction.invoice"
+            class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
+          >
             <span>🧾</span>
-            <span class="text-xs mt-1">
-              {{ auction.invoice ? 'Faktura' : 'Brak faktury' }}
-            </span>
+            <span class="text-xs mt-1">Faktura</span>
           </div>
         </div>
 
