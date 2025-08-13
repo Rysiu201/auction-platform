@@ -19,14 +19,14 @@ type Auction = {
 const auctions = ref<Auction[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
-const myIds = ref<Set<string>>(new Set());
+const favoriteIds = ref<Set<string>>(new Set());
 let refresh: number | null = null;
 
 async function load() {
   try {
     const { data } = await api.get("/auctions/my");
     auctions.value = data;
-    myIds.value = new Set(data.map((a: any) => a.id));
+    favoriteIds.value = new Set(data.map((a: any) => a.id));
   } catch (e: any) {
     error.value = e?.message ?? "Błąd";
   } finally {
@@ -70,20 +70,20 @@ function currentPrice(a: Auction) {
   return fmtPrice(Math.max(a.basePrice, top));
 }
 
-function isMine(id: string) {
-  return myIds.value.has(id);
+function isFavorite(id: string) {
+  return favoriteIds.value.has(id);
 }
 
 async function toggleFavorite(a: Auction, e: Event) {
   e.preventDefault();
   e.stopPropagation();
-  if (isMine(a.id)) {
+  if (isFavorite(a.id)) {
     await api.delete(`/auctions/${a.id}/favorite`);
-    myIds.value.delete(a.id);
+    favoriteIds.value.delete(a.id);
     auctions.value = auctions.value.filter(x => x.id !== a.id);
   } else {
     await api.post(`/auctions/${a.id}/favorite`);
-    myIds.value.add(a.id);
+    favoriteIds.value.add(a.id);
   }
 }
 </script>
@@ -103,7 +103,7 @@ async function toggleFavorite(a: Auction, e: Event) {
       class="auction-link"
     >
       <article class="auction-card">
-        <button class="fav-btn" @click="toggleFavorite(a, $event)">{{ isMine(a.id) ? '★' : '☆' }}</button>
+        <button class="fav-btn" @click="toggleFavorite(a, $event)">{{ isFavorite(a.id) ? '★' : '☆' }}</button>
         <div class="image-wrapper">
           <img
             v-if="a.images?.[0]"

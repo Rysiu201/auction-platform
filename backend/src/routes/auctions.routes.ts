@@ -70,18 +70,14 @@ auctionsRouter.get(
 // -------- MOJE AUKCJE / ULUBIONE ---------
 auctionsRouter.get("/my", requireAuth, async (req, res) => {
   const user = (req as any).user as { id: string };
-  const auctions = await prisma.auction.findMany({
-    where: {
-      OR: [
-        { bids: { some: { userId: user.id } } },
-        { favorites: { some: { userId: user.id } } },
-        { sellerId: user.id },
-      ],
+  const favorites = await prisma.favorite.findMany({
+    where: { userId: user.id },
+    include: {
+      auction: { include: { images: true, bids: true } },
     },
-    include: { images: true, bids: true },
-    orderBy: { endsAt: "asc" },
+    orderBy: { auction: { endsAt: "asc" } },
   });
-  res.json(auctions);
+  res.json(favorites.map((f) => f.auction));
 });
 
 // --------------------------- SZCZEGÓŁ ----------------------------
@@ -260,6 +256,13 @@ auctionsRouter.post("/:id/bid", requireAuth, async (req, res) => {
   }
 
   await prisma.bid.create({ data: { amount, userId: user.id, auctionId: a.id } });
+
+  // auto-subscribe to auction after placing a bid
+  await prisma.favorite.upsert({
+    where: { userId_auctionId: { userId: user.id, auctionId: a.id } },
+    update: {},
+    create: { userId: user.id, auctionId: a.id },
+  });
 
   // anti-sniping: +2 min gdy < 120s do końca
   const secsLeft = (a.endsAt.getTime() - now.getTime()) / 1000;
