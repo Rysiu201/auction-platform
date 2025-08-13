@@ -124,6 +124,7 @@ async function save() {
     }
 
     await load();
+    window.dispatchEvent(new Event('settings-change'));
     message.value = { type: "ok", text: "Zapisano ustawienia." };
   } catch (e:any) {
     console.error("Save settings failed", e);
@@ -148,6 +149,7 @@ async function clearSchedule() {
     if (!ok) throw new Error("Nie udało się wyczyścić terminu.");
 
     await load();
+    window.dispatchEvent(new Event('settings-change'));
     message.value = { type: "ok", text: "Termin wyczyszczony." };
   } catch (e:any) {
     console.error("Clear schedule failed", e);

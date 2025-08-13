@@ -25,6 +25,15 @@ const settings = ref<Settings | null>(null);
 
 let intervalId: number | null = null;
 
+async function loadSettings() {
+  try {
+    const { data } = await api.get("/settings");
+    settings.value = data;
+  } catch {
+    settings.value = { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: null };
+  }
+}
+
 const targetMs = computed(() => {
   const iso = settings.value?.nextAuctionIso ?? null;
   return iso ? new Date(iso).getTime() : null;
@@ -70,11 +79,8 @@ onMounted(async () => {
     latest.value = data;
   } catch { /* ignore */ }
 
-  try {
-    const { data } = await api.get("/settings");
-    settings.value = data;
-  } catch { settings.value = { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: null }; }
-
+  await loadSettings();
+  window.addEventListener('settings-change', loadSettings);
 });
 
 watch(targetMs, updateMsLeft, { immediate: true });
@@ -87,7 +93,7 @@ watch(hasCountdown, (val) => {
   }
 });
 
-onBeforeUnmount(() => stopCountdown());
+onBeforeUnmount(() => { stopCountdown(); window.removeEventListener('settings-change', loadSettings); });
 
 /* ---- helpers ---- */
 function fmtPrice(g: number) { return (g / 100).toFixed(2); }

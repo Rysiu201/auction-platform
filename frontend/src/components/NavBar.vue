@@ -16,14 +16,23 @@ const settings = ref<{ nextAuctionIso: string | null } | null>(null);
 const now = ref(Date.now());
 let timer: number | null = null;
 
+async function loadSettings() {
+  try { const { data } = await api.get('/settings'); settings.value = data; } catch {}
+}
+
 onMounted(async () => {
   loadUser();
-  try { const { data } = await api.get('/settings'); settings.value = data; } catch {}
+  await loadSettings();
   timer = window.setInterval(() => { now.value = Date.now(); }, 1000);
   window.addEventListener('user-change', loadUser);
+  window.addEventListener('settings-change', loadSettings);
 });
 
-onBeforeUnmount(() => { if (timer) clearInterval(timer); window.removeEventListener('user-change', loadUser); });
+onBeforeUnmount(() => {
+  if (timer) clearInterval(timer);
+  window.removeEventListener('user-change', loadUser);
+  window.removeEventListener('settings-change', loadSettings);
+});
 
 const auctionsActive = computed(() => {
   const iso = settings.value?.nextAuctionIso;
