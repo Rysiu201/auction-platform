@@ -7,6 +7,9 @@ const route = useRoute();
 const id = route.params.id as string;
 const backend = import.meta.env.VITE_BACKEND_URL as string;
 
+const thumbsRef = ref<HTMLDivElement | null>(null);
+const thumbRefs = ref<HTMLElement[]>([]); // refs do miniaturek
+
 const auction = ref<any>(null);
 const topAmount = ref(0); // grosze
 const bidAmount = ref<string>('');
@@ -28,10 +31,10 @@ const conditionLabel: Record<string, string> = {
 
 const conditionColors: Record<string, string> = {
   NOWY: 'bg-green-100 text-green-800',
-  BARDZO_DOBRY: 'bg-emerald-100 text-emerald-800',
+  BARDZO_DOBRY: 'bg-cyan-100 text-emerald-800',
   DOBRY: 'bg-amber-100 text-amber-800',
-  USZKODZONY: 'bg-orange-100 text-orange-800',
-  DO_NAPRAWY: 'bg-red-100 text-red-800',
+  USZKODZONY: 'bg-red-100 text-red-800',
+  DO_NAPRAWY: 'bg-orange-100 text-orange-800',
 };
 
 const badgeBase =
@@ -100,25 +103,46 @@ function updateTimeLeft() {
   if (diff <= 0 && countTimer) window.clearInterval(countTimer);
 }
 
-function nextImage() {
-  if (!auction.value?.images?.length) return;
-  currentImg.value = (currentImg.value + 1) % auction.value.images.length;
+// przewijanie paska miniaturek o krok (gdy overflow)
+function scrollThumbs(dir: 'left'|'right') {
+  const el = thumbsRef.value;
+  if (!el) return;
+  const first = el.querySelector<HTMLButtonElement>('button');
+  const gap = parseFloat(getComputedStyle(el).columnGap || getComputedStyle(el).gap || '0') || 12;
+  const step = first ? first.getBoundingClientRect().width + gap : 160;
+  el.scrollBy({ left: dir === 'left' ? -step : step, behavior: 'smooth' });
+}
+
+// przewinięcie aktywnej miniatury w widok (centrowanie)
+function scrollActiveThumbIntoView() {
+  const el = thumbsRef.value;
+  const btn = thumbRefs.value[currentImg.value];
+  if (!el || !btn) return;
+  btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+}
+
+function setActive(i: number) {
+  currentImg.value = i;
+  scrollActiveThumbIntoView();
 }
 
 function prevImage() {
   if (!auction.value?.images?.length) return;
   currentImg.value =
-    (currentImg.value - 1 + auction.value.images.length) %
-    auction.value.images.length;
+    (currentImg.value - 1 + auction.value.images.length) % auction.value.images.length;
+  scrollActiveThumbIntoView();
+}
+
+function nextImage() {
+  if (!auction.value?.images?.length) return;
+  currentImg.value = (currentImg.value + 1) % auction.value.images.length;
+  scrollActiveThumbIntoView();
 }
 
 function onKey(e: KeyboardEvent) {
   if (e.key === 'Escape' && previewUrl.value) {
     closePreview();
-    return;
   }
-  if (e.key === 'ArrowRight') nextImage();
-  if (e.key === 'ArrowLeft') prevImage();
 }
 
 function openPreview(i: number) {
@@ -220,10 +244,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    v-if="auction"
-    class="max-w-7xl mx-auto p-4 lg:p-6 flex flex-col lg:flex-row gap-6"
-  >
+  <div v-if="auction" class="max-w-7xl mx-auto p-4 lg:p-6 flex flex-col lg:flex-row gap-6">
     <!-- Left column -->
     <div class="flex-1">
       <div
@@ -237,76 +258,82 @@ onUnmounted(() => {
           class="max-h-[480px] w-full object-contain rounded-xl"
         />
       </div>
-      <div v-if="auction.images?.length > 1" class="relative mt-4">
+
+      <!-- GALERIA MINIATUREK -->
+      <div v-if="auction.images?.length > 1" class="relative mt-4 select-none">
+        <!-- lewa -->
         <button
           aria-label="Poprzednie zdjęcie"
-          @click="prevImage"
-          class="absolute left-0 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-slate-900/80 text-white shadow hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 flex items-center justify-center"
+          @click="prevImage(); scrollThumbs('left')"
+          class="absolute left-1 top-1/2 -translate-y-1/2 z-10 grid place-items-center
+                 h-9 w-9 rounded-full bg-slate-800/85 text-white shadow-md ring-1 ring-white/15
+                 backdrop-blur transition hover:bg-slate-800 focus:outline-none
+                 focus-visible:ring-2 focus-visible:ring-sky-400"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 18L9 12l6-6"/>
           </svg>
         </button>
-        <div class="overflow-x-auto flex gap-2 px-12">
+
+        <!-- pasek miniaturek -->
+        <div
+          ref="thumbsRef"
+          class="flex gap-3 overflow-x-auto scroll-smooth px-12 py-2"
+          style="-webkit-overflow-scrolling: touch;"
+        >
           <button
             v-for="(img, i) in auction.images"
-            :key="img.url"
-            @click="currentImg = i"
+            :key="img.url || i"
+            :ref="el => el && (thumbRefs[i] = el as HTMLElement)"
+            @click="setActive(i)"
             :data-active="i === currentImg"
-            class="flex-shrink-0 h-20 w-20 md:h-24 md:w-24 rounded-lg overflow-hidden focus:outline-none ring-0 data-[active=true]:ring-2 data-[active=true]:ring-sky-500"
+            class="relative shrink-0 aspect-square w-20 md:w-24 overflow-hidden
+                   bg-transparent p-0 border-0 rounded-md
+                   focus:outline-none ring-0
+                   data-[active=true]:ring-2 data-[active=true]:ring-sky-500 data-[active=true]:ring-offset-2 data-[active=true]:ring-offset-white"
           >
-            <img :src="`${backend}${img.url}`" alt="" class="object-cover w-full h-full" />
+            <img
+              :src="`${backend}${img.url}`"
+              :alt="img.alt || `Zdjęcie ${i+1}`"
+              class="block h-full w-full object-cover select-none"
+              draggable="false"
+            />
           </button>
         </div>
+
+        <!-- prawa -->
         <button
           aria-label="Następne zdjęcie"
-          @click="nextImage"
-          class="absolute right-0 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-slate-900/80 text-white shadow hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 flex items-center justify-center"
+          @click="nextImage(); scrollThumbs('right')"
+          class="absolute right-1 top-1/2 -translate-y-1/2 z-10 grid place-items-center
+                 h-9 w-9 rounded-full bg-slate-800/85 text-white shadow-md ring-1 ring-white/15
+                 backdrop-blur transition hover:bg-slate-800 focus:outline-none
+                 focus-visible:ring-2 focus-visible:ring-sky-400"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/>
           </svg>
         </button>
+
+        <!-- gradienty na brzegach -->
+        <div class="pointer-events-none absolute inset-y-0 left-0 w-10 rounded-l-xl bg-gradient-to-r from-white/80 to-transparent"></div>
+        <div class="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-xl bg-gradient-to-l from-white/80 to-transparent"></div>
       </div>
     </div>
 
     <!-- Right column -->
     <div class="w-full lg:w-96">
-      <div
-        class="relative rounded-2xl bg-white/80 backdrop-blur shadow-lg p-6 space-y-4 sticky top-24"
-      >
+      <div class="relative rounded-2xl bg-white/80 backdrop-blur shadow-lg p-6 space-y-4 sticky top-24">
+        <!-- Ulubione -->
         <button
           v-if="user"
           @click="toggleFavorite"
           aria-label="Dodaj do ulubionych"
           class="absolute right-4 top-4 transition-transform hover:scale-110 focus:outline-none"
-          :class="
-            isFavorite
-              ? 'text-amber-400 hover:text-amber-500'
-              : 'text-slate-400 hover:text-slate-500'
-          "
+          :class="isFavorite ? 'text-amber-400 hover:text-amber-500' : 'text-slate-400 hover:text-slate-500'"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            class="w-6 h-6"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 0 0 .95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 0 0-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 0 0-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 0 0-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 0 0 .95-.69l1.286-3.967z"
-            />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 0 0 .95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 0 0-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 0 0-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 0 0-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 0 0 .95-.69l1.286-3.967z"/>
           </svg>
         </button>
 
@@ -314,49 +341,26 @@ onUnmounted(() => {
         <div class="flex flex-wrap gap-4">
           <div>
             <div class="text-xs text-slate-500 mb-1">Status aukcji:</div>
-            <span
-              :class="[
-                badgeBase,
-                auction.status === 'ENDED'
-                  ? badgeVariants.statusEnded
-                  : badgeVariants.statusActive,
-              ]"
-            >
+            <span :class="[badgeBase, auction.status === 'ENDED' ? badgeVariants.statusEnded : badgeVariants.statusActive]">
               {{ auction.status === 'ENDED' ? 'Zakończona' : 'Aktywna' }}
             </span>
           </div>
           <div>
             <div class="text-xs text-slate-500 mb-1">Stan sprzętu:</div>
-            <span
-              :class="[
-                badgeBase,
-                conditionColors[auction.condition] || 'bg-slate-100 text-slate-800',
-              ]"
-            >
+            <span :class="[badgeBase, conditionColors[auction.condition] || 'bg-slate-100 text-slate-800']">
               {{ conditionLabel[auction.condition] || auction.condition }}
             </span>
           </div>
           <span v-if="auction.featured" :class="[badgeBase, badgeVariants.featured]">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-3 h-3"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 00-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z"
-              />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 0 0-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 0 0-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 0 0-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 0 0 .95-.69l1.286-3.967z"/></svg>
             Wyróżniona
           </span>
         </div>
 
         <h2 class="text-2xl font-bold">{{ auction.title }}</h2>
 
-        <p
-          class="text-gray-700 text-sm"
-          style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;"
-        >
+        <p class="text-gray-700 text-sm"
+           style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
           {{ auction.description }}
         </p>
 
@@ -366,80 +370,43 @@ onUnmounted(() => {
         </div>
 
         <div v-if="auction.status !== 'ENDED' && hasStarted" class="flex items-center gap-2 rounded-lg bg-amber-50 text-amber-900 px-3 py-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="9" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3" />
           </svg>
-          <span>
-            Pozostało:
-            {{ formattedTimeLeft }}
-          </span>
+          <span>Pozostało: {{ formattedTimeLeft }}</span>
         </div>
 
         <div v-if="auction.status !== 'ENDED' && hasStarted" class="space-y-2">
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 select-none">PLN</span>
-            <input
-              v-model="bidAmount"
-              type="number"
-              class="w-full h-11 rounded-xl border pl-12 pr-3 focus:outline-none focus:ring"
-              :min="minBidPLN"
-            />
+            <input v-model="bidAmount" type="number" class="w-full h-11 rounded-xl border pl-12 pr-3 focus:outline-none focus:ring" :min="minBidPLN" />
           </div>
           <p v-if="bidError" class="text-sm text-red-600">{{ bidError }}</p>
-          <button
-            @click="placeBid"
-            :disabled="!canBid"
-            :aria-disabled="!canBid"
-            class="w-full h-11 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-          >
+          <button @click="placeBid" :disabled="!canBid" :aria-disabled="!canBid"
+                  class="w-full h-11 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
             <span v-if="!loading">Licytuj</span>
             <span v-else class="animate-pulse">...</span>
           </button>
-          <p class="text-sm text-gray-500">
-            Min. przebicie: {{ toPLN(auction.minIncrement) }} PLN
-          </p>
+          <p class="text-sm text-gray-500">Min. przebicie: {{ toPLN(auction.minIncrement) }} PLN</p>
         </div>
-        <p v-else-if="auction.status !== 'ENDED'" class="text-gray-500">
-          Aukcja jeszcze się nie rozpoczęła.
-        </p>
+        <p v-else-if="auction.status !== 'ENDED'" class="text-gray-500">Aukcja jeszcze się nie rozpoczęła.</p>
 
-        <div
-          v-if="shippingOptionsCount"
-          class="grid gap-2 pt-2"
-          :class="{
-            'grid-cols-1': shippingOptionsCount === 1,
-            'grid-cols-2': shippingOptionsCount === 2,
-            'grid-cols-3': shippingOptionsCount === 3,
-          }"
-        >
-          <div
-            v-if="auction.personalPickup"
-            class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-          >
-            <span>🚗</span>
-            <span class="text-xs mt-1">Odbiór</span>
+        <div v-if="shippingOptionsCount"
+             class="grid gap-2 pt-2"
+             :class="{
+               'grid-cols-1': shippingOptionsCount === 1,
+               'grid-cols-2': shippingOptionsCount === 2,
+               'grid-cols-3': shippingOptionsCount === 3,
+             }">
+          <div v-if="auction.personalPickup" class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+            <span>🚗</span><span class="text-xs mt-1">Odbiór Osobisty</span>
           </div>
-          <div
-            v-if="auction.courierShipping"
-            class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-          >
-            <span>📦</span>
-            <span class="text-xs mt-1">Kurier</span>
+          <div v-if="auction.courierShipping" class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+            <span>📦</span><span class="text-xs mt-1">Wysyłka Kurierem</span>
           </div>
-          <div
-            v-if="auction.invoice"
-            class="flex flex-col items-center p-3 bg-gray-50 rounded-lg"
-          >
-            <span>🧾</span>
-            <span class="text-xs mt-1">Faktura</span>
+          <div v-if="auction.invoice" class="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
+            <span>🧾</span><span class="text-xs mt-1">Moźliwa Faktura</span>
           </div>
         </div>
 
@@ -447,13 +414,11 @@ onUnmounted(() => {
       </div>
     </div>
   </div>
+
   <p v-else>Ładowanie…</p>
-  <div
-    v-if="previewUrl"
-    class="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-    @click="closePreview"
-  >
+
+  <!-- PREVIEW -->
+  <div v-if="previewUrl" class="fixed inset-0 bg-red/80 flex items-center justify-center z-50" @click="closePreview">
     <img :src="previewUrl" alt="" class="max-w-full max-h-full object-contain" />
   </div>
 </template>
-
