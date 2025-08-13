@@ -103,7 +103,7 @@ async function toggleFavorite(a: Auction, e: Event) {
       class="auction-link"
     >
       <article class="auction-card">
-        <button class="fav-btn" @click="toggleFavorite(a, $event)">{{ isFavorite(a.id) ? '★' : '☆' }}</button>
+        <button class="fav-btn text-xl" @click="toggleFavorite(a, $event)">{{ isFavorite(a.id) ? '★' : '☆' }}</button>
         <div class="image-wrapper">
           <img
             v-if="a.images?.[0]"
