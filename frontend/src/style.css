@@ -190,10 +190,10 @@ button:focus-visible {
   border-color: #cc0000;
   margin-top: 0.5vh;
   width: 8vh;
-  height: 5vh;
+  height: 3.5vh;
   margin-left: 1vh;
   margin-right: 1vh;
-  border-width: 0.2vh;
+  border-width: 0.1vh;
   border-color: black;
   text-align: center;
   border-radius: 1vh;
@@ -207,12 +207,12 @@ button:focus-visible {
   background: #0059b3;
   border-color: #0059b3;
   width: 8vh;
-  height: 5vh;
+  height: 3.5vh;
   margin-top: 1vh;
   margin-left: 1vh;
   margin-right: 1vh;
   border-radius: 1vh;
-  border-width: 0.2vh;
+  border-width: 0.1vh;
   border-color: black;
   text-align: center;
 }
@@ -225,12 +225,12 @@ button:focus-visible {
   background: #ff8c00;
   border-color: #ff8c00;
   width: 8vh;
-  height: 5vh;
+  height: 3.5vh;
   margin-top: 1vh;
   margin-left: 1vh;
   margin-right: 1vh;
   border-radius: 1vh;
-  border-width: 0.2vh;
+  border-width: 0.1vh;
   border-color: black;
   text-align: center;
 }

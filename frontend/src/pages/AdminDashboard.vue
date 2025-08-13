@@ -200,7 +200,7 @@ async function deleteAuction(id: string) {
             <h2>Zakończone</h2>
             <table>
               <thead>
-                <tr><th>Tytuł</th><th>Zwycięzca</th><th>Kwota</th><th></th></tr>
+                <tr><th>Tytuł</th><th>Zwycięzca</th><th>Kwota</th><th>Akcja</th></tr>
               </thead>
               <tbody>
                 <tr v-for="a in overview.ended" :key="a.id">
@@ -221,7 +221,7 @@ async function deleteAuction(id: string) {
                   <th>Cena</th>
                   <th>Start</th>
                   <th>Koniec</th>
-                  <th></th>
+                  <th>Akcja</th>
                 </tr>
               </thead>
               <tbody>
