@@ -225,9 +225,8 @@ onUnmounted(() => {
         <button
           aria-label="Poprzednie zdjęcie"
           @click="prevImage"
-          class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full w-10 h-10 flex items-center justify-center focus:outline-none focus-visible:ring"
+          class="absolute left-0 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-slate-900/80 text-white shadow hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 flex items-center justify-center"
         >
-          <span class="sr-only">Poprzednie zdjęcie</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="w-5 h-5"
@@ -243,10 +242,8 @@ onUnmounted(() => {
             v-for="(img, i) in auction.images"
             :key="img.url"
             @click="currentImg = i"
-            :class="[
-              'flex-shrink-0 h-20 w-20 md:h-24 md:w-24 rounded-lg overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
-              i === currentImg ? 'ring-2 ring-blue-500' : ''
-            ]"
+            :data-active="i === currentImg"
+            class="flex-shrink-0 h-20 w-20 md:h-24 md:w-24 rounded-lg overflow-hidden focus:outline-none ring-0 data-[active=true]:ring-2 data-[active=true]:ring-sky-500"
           >
             <img :src="`${backend}${img.url}`" alt="" class="object-cover w-full h-full" />
           </button>
@@ -254,9 +251,8 @@ onUnmounted(() => {
         <button
           aria-label="Następne zdjęcie"
           @click="nextImage"
-          class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full w-10 h-10 flex items-center justify-center focus:outline-none focus-visible:ring"
+          class="absolute right-0 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-slate-900/80 text-white shadow hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 flex items-center justify-center"
         >
-          <span class="sr-only">Następne zdjęcie</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="w-5 h-5"
@@ -273,23 +269,57 @@ onUnmounted(() => {
     <!-- Right column -->
     <div class="w-full lg:w-96">
       <div
-        class="rounded-2xl bg-white/80 backdrop-blur shadow-lg p-6 space-y-4 sticky top-24"
+        class="relative rounded-2xl bg-white/80 backdrop-blur shadow-lg p-6 space-y-4 sticky top-24"
       >
-        <!-- Badges -->
-        <div class="flex flex-wrap gap-2">
-          <span
-            :class="[
-              badgeBase,
-              auction.status === 'ENDED'
-                ? badgeVariants.statusEnded
-                : badgeVariants.statusActive,
-            ]"
+        <button
+          v-if="user"
+          @click="toggleFavorite"
+          aria-label="Dodaj do ulubionych"
+          class="absolute right-4 top-4 text-amber-400 hover:text-amber-500 transition-transform hover:scale-110 focus:outline-none"
+        >
+          <svg
+            v-if="isFavorite"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            class="w-6 h-6"
           >
-            {{ auction.status === 'ENDED' ? 'Zakończona' : 'Aktywna' }}
-          </span>
-          <span :class="[badgeBase, badgeVariants.condition]">
-            {{ conditionLabel[auction.condition] || auction.condition }}
-          </span>
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 0 0 .95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 0 0-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 0 0-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 0 0-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 0 0 .95-.69l1.286-3.967z" />
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="2"
+            stroke="currentColor"
+            class="w-6 h-6"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 0 0 .95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.383 2.46a1 1 0 0 0-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.384-2.46a1 1 0 0 0-1.176 0l-3.384 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 0 0-.364-1.118L2.044 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 0 0 .95-.69l1.286-3.967z" />
+          </svg>
+        </button>
+
+        <!-- Badges -->
+        <div class="flex flex-wrap gap-4">
+          <div>
+            <div class="text-xs text-slate-500 mb-1">Status aukcji:</div>
+            <span
+              :class="[
+                badgeBase,
+                auction.status === 'ENDED'
+                  ? badgeVariants.statusEnded
+                  : badgeVariants.statusActive,
+              ]"
+            >
+              {{ auction.status === 'ENDED' ? 'Zakończona' : 'Aktywna' }}
+            </span>
+          </div>
+          <div>
+            <div class="text-xs text-slate-500 mb-1">Stan sprzętu:</div>
+            <span :class="[badgeBase, badgeVariants.condition]">
+              {{ conditionLabel[auction.condition] || auction.condition }}
+            </span>
+          </div>
           <span v-if="auction.featured" :class="[badgeBase, badgeVariants.featured]">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -305,17 +335,7 @@ onUnmounted(() => {
           </span>
         </div>
 
-        <div class="flex justify-between items-start">
-          <h2 class="text-2xl font-bold">{{ auction.title }}</h2>
-          <button
-            v-if="user"
-            @click="toggleFavorite"
-            :aria-label="isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'"
-            class="text-2xl leading-none"
-          >
-            {{ isFavorite ? '★' : '☆' }}
-          </button>
-        </div>
+        <h2 class="text-2xl font-bold">{{ auction.title }}</h2>
 
         <p
           class="text-gray-700 text-sm"
@@ -325,24 +345,21 @@ onUnmounted(() => {
         </p>
 
         <div>
-          <span :class="[badgeBase, 'bg-slate-100 text-slate-700']">Aktualna oferta</span>
+          <span class="inline-flex items-center rounded-full bg-sky-100 text-sky-800 px-2.5 py-1 text-xs font-medium">Aktualna oferta</span>
           <div class="mt-1 text-4xl font-bold">{{ toPLN(topAmount) }} PLN</div>
         </div>
 
-        <div class="flex items-center gap-2 bg-amber-50 text-amber-900 rounded-lg px-3 py-2">
+        <div class="flex items-center gap-2 rounded-lg bg-amber-50 text-amber-900 px-3 py-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="w-4 h-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            stroke-width="2"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 6v6l4 2"
-            />
+            <circle cx="12" cy="12" r="9" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3" />
           </svg>
           <span>
             Pozostało:
