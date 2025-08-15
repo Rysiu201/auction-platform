@@ -14,13 +14,17 @@ export function attachBidding(io: Server) {
       async (payload: { auctionId: string; userId: string; amount: number }) => {
         try {
           const { auctionId, userId, amount } = payload;
+          const now = new Date();
+          const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+          if (settings?.auctionCloseIso && now >= settings.auctionCloseIso) {
+            return socket.emit("bid-error", "Dom aukcyjny jest zamknięty");
+          }
           const auction = await prisma.auction.findUnique({
             where: { id: auctionId },
             include: { bids: { orderBy: { amount: "desc" }, take: 1 } }
           });
           if (!auction) return socket.emit("bid-error", "Aukcja nie istnieje");
 
-          const now = new Date();
           if (
             auction.status !== "ACTIVE" ||
             now < auction.startsAt ||
