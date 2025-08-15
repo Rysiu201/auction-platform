@@ -404,6 +404,29 @@ button:focus-visible {
   max-width: 400px;
 }
 
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-form .field {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.login-form .label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.login-form input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 .alt-logins {
   margin-top: 10px;
   display: flex;
