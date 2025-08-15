@@ -159,7 +159,7 @@ async function toggleFavorite(a: Auction, e: Event) {
             <div class="image-wrapper">
               <img
                 v-if="a.images?.[0]"
-                :src="`${backend}${a.images[0].url}``
+                :src="`${backend}${a.images[0].url}`"
                 alt=""
                 class="auction-image"
               />
@@ -192,7 +192,7 @@ async function toggleFavorite(a: Auction, e: Event) {
             <div class="image-wrapper">
               <img
                 v-if="a.images?.[0]"
-                :src="`${backend}${a.images[0].url}``
+                :src="`${backend}${a.images[0].url}`"
                 alt=""
                 class="auction-image"
               />
