@@ -418,44 +418,53 @@ onUnmounted(() => {
   <!-- PREVIEW -->
   <div
     v-if="previewOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm relative"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur"
+    @keyup.esc="closePreview"
     @click.self="closePreview"
   >
-    <button
-      aria-label="Zamknij podgląd"
-      @click="closePreview"
-      class="absolute top-6 right-6 z-10 grid h-10 w-10 place-items-center rounded-full bg-slate-900/70 text-white shadow-md ring-1 ring-white/15 transition hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-    >
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-      </svg>
-    </button>
+<!-- Close -->
+<button
+  aria-label="Zamknij podgląd"
+  @click="closePreview"
+  class="absolute top-6 right-6 flex items-center justify-center
+         w-8 h-12 rounded-full                <!-- większy + zawsze idealne koło -->
+         bg-white/10 text-white text-2xl       <!-- X większy -->
+         leading-none                          <!-- brak dodatkowego odstępu -->
+         hover:bg-white/20 focus:outline-none
+         focus-visible:ring-2 focus-visible:ring-sky-400"
+>
+  <span class="pointer-events-none select-none">×</span>
+</button>
 
+
+    <!-- Prev -->
     <button
       aria-label="Poprzednie zdjęcie"
       @click.stop="prevImage"
-      class="absolute left-6 top-1/2 -translate-y-1/2 z-10 grid h-12 w-12 place-items-center rounded-full bg-slate-900/70 text-white shadow-md ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+      class="absolute left-4 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
     >
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 18L9 12l6-6"/>
+      <svg width="18" height="18" viewBox="9 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 18L9 12l6-6"/>
       </svg>
     </button>
 
+    <!-- Img -->
     <img
       v-if="auction.images?.[currentImg]"
       :src="`${backend}${auction.images[currentImg].url}`"
       alt=""
-      class="max-w-[90vw] max-h-[80vh] object-contain rounded-lg"
+      class="max-h-[80vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
     />
 
+    <!-- Next -->
     <button
       aria-label="Następne zdjęcie"
       @click.stop="nextImage"
-      class="absolute right-6 top-1/2 -translate-y-1/2 z-10 grid h-12 w-12 place-items-center rounded-full bg-slate-900/70 text-white shadow-md ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+      class="absolute right-4 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
     >
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6"/>
-      </svg>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M0 6l6 6-6 6"/>
+    </svg>
     </button>
   </div>
 </template>
