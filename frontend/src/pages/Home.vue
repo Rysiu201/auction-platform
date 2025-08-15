@@ -221,13 +221,13 @@ const conditionColor: Record<string, string> = {
 
 /* karta */
 .auction-card{
-  position:relative;
-  width: clamp(14rem, 24vw, 18rem);
-  border-radius: 0.75rem;
-  background:#fff;
+  position: relative;
+  width: clamp(10rem, 12vw, 9rem);
+  border-radius: 1.35rem;
+  background: #fff;
   box-shadow: 0 6px 18px rgba(0,0,0,.08);
-  overflow:hidden;
-  transition: transform .15s ease, box-shadow .15s ease;
+  overflow: hidden;
+  transition: transform .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 .auction-card:hover{
   transform: translateY(-2px);
