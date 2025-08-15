@@ -16,7 +16,9 @@ type Auction = {
   condition: string;
 };
 
-const auctions = ref<Auction[]>([]);
+const favorites = ref<Auction[]>([]);
+const won = ref<Auction[]>([]);
+const outbid = ref<Auction[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const favoriteIds = ref<Set<string>>(new Set());
@@ -24,9 +26,15 @@ let refresh: number | null = null;
 
 async function load() {
   try {
-    const { data } = await api.get("/auctions/my");
-    auctions.value = data;
-    favoriteIds.value = new Set(data.map((a: any) => a.id));
+    const [favRes, wonRes, outbidRes] = await Promise.all([
+      api.get("/auctions/my"),
+      api.get("/auctions/my/won"),
+      api.get("/auctions/my/outbid"),
+    ]);
+    favorites.value = favRes.data;
+    won.value = wonRes.data;
+    outbid.value = outbidRes.data;
+    favoriteIds.value = new Set(favRes.data.map((a: any) => a.id));
   } catch (e: any) {
     error.value = e?.message ?? "Błąd";
   } finally {
@@ -80,7 +88,7 @@ async function toggleFavorite(a: Auction, e: Event) {
   if (isFavorite(a.id)) {
     await api.delete(`/auctions/${a.id}/favorite`);
     favoriteIds.value.delete(a.id);
-    auctions.value = auctions.value.filter(x => x.id !== a.id);
+    favorites.value = favorites.value.filter(x => x.id !== a.id);
   } else {
     await api.post(`/auctions/${a.id}/favorite`);
     favoriteIds.value.add(a.id);
@@ -90,14 +98,15 @@ async function toggleFavorite(a: Auction, e: Event) {
 
 <template>
   <section class="page-section">
-  <h1>Moje aukcje ({{ auctions.length }})</h1>
+  <h1>Moje aukcje</h1>
 
   <p v-if="loading">Ładowanie…</p>
   <p v-if="error" style="color:red">{{ error }}</p>
 
-  <div v-if="!loading && auctions.length" class="auction-grid">
+  <h2>Obserwowane ({{ favorites.length }})</h2>
+  <div v-if="!loading && favorites.length" class="auction-grid">
     <router-link
-      v-for="a in auctions"
+      v-for="a in favorites"
       :key="a.id"
       :to="`/auction/${a.id}`"
       class="auction-link"
@@ -132,8 +141,69 @@ async function toggleFavorite(a: Auction, e: Event) {
       </article>
     </router-link>
   </div>
+  <p v-if="!loading && !favorites.length">Brak aukcji.</p>
 
-  <p v-else-if="!loading && !auctions.length">Brak aukcji.</p>
+  <h2>Zwyciężone ({{ won.length }})</h2>
+  <div v-if="!loading && won.length" class="auction-grid">
+    <router-link
+      v-for="a in won"
+      :key="a.id"
+      :to="`/auction/${a.id}`"
+      class="auction-link"
+    >
+      <article class="auction-card">
+        <div class="image-wrapper">
+          <img
+            v-if="a.images?.[0]"
+            :src="`${backend}${a.images[0].url}`"
+            alt=""
+            class="auction-image"
+          />
+          <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
+            {{ conditionLabel[a.condition] || a.condition }}
+          </span>
+        </div>
+        <div class="auction-info">
+          <h3 class="auction-title">{{ a.title }}</h3>
+          <div class="auction-price">{{ currentPrice(a) }} PLN</div>
+          <div class="auction-offers">{{ a.bids.length }} ofert</div>
+        </div>
+        <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
+      </article>
+    </router-link>
+  </div>
+  <p v-if="!loading && !won.length">Brak aukcji.</p>
+
+  <h2>Przebite ({{ outbid.length }})</h2>
+  <div v-if="!loading && outbid.length" class="auction-grid">
+    <router-link
+      v-for="a in outbid"
+      :key="a.id"
+      :to="`/auction/${a.id}`"
+      class="auction-link"
+    >
+      <article class="auction-card">
+        <div class="image-wrapper">
+          <img
+            v-if="a.images?.[0]"
+            :src="`${backend}${a.images[0].url}`"
+            alt=""
+            class="auction-image"
+          />
+          <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
+            {{ conditionLabel[a.condition] || a.condition }}
+          </span>
+        </div>
+        <div class="auction-info">
+          <h3 class="auction-title">{{ a.title }}</h3>
+          <div class="auction-price">{{ currentPrice(a) }} PLN</div>
+          <div class="auction-offers">{{ a.bids.length }} ofert</div>
+        </div>
+        <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
+      </article>
+    </router-link>
+  </div>
+  <p v-if="!loading && !outbid.length">Brak aukcji.</p>
   </section>
 </template>
 
