@@ -24,6 +24,7 @@ type Settings = {
 const endingSoon = ref<Auction[]>([]);
 const settings = ref<Settings | null>(null);
 
+const now = ref(Date.now());
 let intervalId: number | null = null;
 
 async function loadSettings() {
@@ -40,7 +41,10 @@ const targetMs = computed(() => {
   return iso ? new Date(iso).getTime() : null;
 });
 
-const msLeft = ref(0);
+const msLeft = computed(() => {
+  const t = targetMs.value;
+  return t ? Math.max(0, t - now.value) : 0;
+});
 const hasSchedule = computed(() => targetMs.value !== null);
 const hasCountdown = computed(() => hasSchedule.value && msLeft.value > 0);
 const closeMs = computed(() => {
@@ -51,16 +55,12 @@ const auctionsActive = computed(() => {
   const startReady = hasSchedule.value && msLeft.value <= 0;
   if (!startReady) return false;
   const c = closeMs.value;
-  return c === null || Date.now() < c;
+  return c === null || now.value < c;
 });
 const auctionClosed = computed(() => {
   const c = closeMs.value;
-  return c !== null && Date.now() >= c;
+  return c !== null && now.value >= c;
 });
-
-function updateMsLeft() {
-  msLeft.value = targetMs.value ? Math.max(0, targetMs.value - Date.now()) : 0;
-}
 
 const formattedTime = computed(() => {
   const total = Math.floor(msLeft.value / 1000);
@@ -70,22 +70,6 @@ const formattedTime = computed(() => {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 });
 
-function startCountdownToTarget() {
-  stopCountdown();
-  updateMsLeft();
-  intervalId = window.setInterval(() => {
-    updateMsLeft();
-    if (msLeft.value <= 0) stopCountdown();
-  }, 1000);
-}
-
-function stopCountdown() {
-  if (intervalId) {
-    clearInterval(intervalId);
-    intervalId = null;
-  }
-}
-
 /* ---- DATA ---- */
 onMounted(async () => {
   try {
@@ -94,20 +78,21 @@ onMounted(async () => {
   } catch { /* ignore */ }
 
   await loadSettings();
+  intervalId = window.setInterval(() => { now.value = Date.now(); }, 1000);
   window.addEventListener('settings-change', loadSettings);
 });
 
-watch(targetMs, updateMsLeft, { immediate: true });
-
-watch(hasCountdown, (val) => {
-  if (val) {
-    startCountdownToTarget();
-  } else {
-    stopCountdown();
-  }
+onBeforeUnmount(() => {
+  if (intervalId) clearInterval(intervalId);
+  window.removeEventListener('settings-change', loadSettings);
 });
 
-onBeforeUnmount(() => { stopCountdown(); window.removeEventListener('settings-change', loadSettings); });
+watch(auctionClosed, (val) => {
+  if (val && settings.value) {
+    settings.value.nextAuctionIso = null;
+    settings.value.auctionCloseIso = null;
+  }
+});
 
 /* ---- helpers ---- */
 function fmtPrice(g: number) { return (g / 100).toFixed(2); }
