@@ -18,10 +18,19 @@ export const router = createRouter({
     { path: "/info", component: Info },
     { path: "/contact", component: Contact },
     { path: "/login", component: Login },
-    { path: "/admin/create", component: CreateAuction },
-    { path: "/admin/settings", component: AdminSettings },
-    { path: "/admin", component: AdminDashboard },
+    { path: "/admin/create", component: CreateAuction, meta: { requiresAdmin: true } },
+    { path: "/admin/settings", component: AdminSettings, meta: { requiresAdmin: true } },
+    { path: "/admin", component: AdminDashboard, meta: { requiresAdmin: true } },
     { path: "/auction/:id", component: AuctionDetail },
     { path: "/my-auctions", component: MyAuctions },
   ],
+});
+
+router.beforeEach((to, _from, next) => {
+  if ((to.meta as any).requiresAdmin) {
+    const raw = localStorage.getItem("user");
+    const user = raw ? JSON.parse(raw) : null;
+    if (!user || user.role !== "ADMIN") return next("/");
+  }
+  next();
 });

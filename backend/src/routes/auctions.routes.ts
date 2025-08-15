@@ -270,13 +270,18 @@ auctionsRouter.post("/:id/bid", requireAuth, async (req, res) => {
   if (!Number.isFinite(amount))
     return res.status(400).json({ message: "Kwota nieprawidłowa" });
 
+  const now = new Date();
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  if (settings?.auctionCloseIso && now >= settings.auctionCloseIso) {
+    return res.status(403).json({ message: "Dom aukcyjny jest zamknięty" });
+  }
+
   const a = await prisma.auction.findUnique({
     where: { id: req.params.id },
     include: { bids: { orderBy: { amount: "desc" }, take: 1 } },
   });
   if (!a) return res.status(404).json({ message: "Not found" });
 
-  const now = new Date();
   if (a.status !== "ACTIVE" || now < a.startsAt || now > a.endsAt) {
     return res.status(400).json({ message: "Aukcja nieaktywna" });
   }

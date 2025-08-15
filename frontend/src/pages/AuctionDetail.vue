@@ -27,6 +27,21 @@ const timeLeft = ref(0);
 const user = ref<any>(null);
 const isFavorite = ref(false);
 const loading = ref(false);
+const settings = ref<{ auctionCloseIso: string | null } | null>(null);
+const now = ref(Date.now());
+let settingsTimer: number | undefined;
+
+async function loadSettings() {
+  try {
+    const { data } = await api.get('/settings');
+    settings.value = data;
+  } catch {}
+}
+
+const auctionClosed = computed(() => {
+  const iso = settings.value?.auctionCloseIso;
+  return iso ? new Date(iso).getTime() <= now.value : false;
+});
 
 const conditionLabel: Record<string, string> = {
   NOWY: 'Nowy',
@@ -87,7 +102,8 @@ const canBid = computed(
     Number(bidAmount.value) >= minBidPLN.value &&
     !loading.value &&
     !isEnded.value &&
-    hasStarted.value
+    hasStarted.value &&
+    !auctionClosed.value
 );
 
 const shippingOptionsCount = computed(() => {
@@ -224,17 +240,22 @@ onMounted(async () => {
   await loadFull();
   await loadFavoriteStatus();
   updateTimeLeft();
+  await loadSettings();
+  settingsTimer = window.setInterval(() => { now.value = Date.now(); }, 1000);
   pollTimer = window.setInterval(pollTop, 2000);
   if (!isEnded.value) countTimer = window.setInterval(updateTimeLeft, 1000);
   window.addEventListener('user-change', onUserChange);
   window.addEventListener('keydown', onKey);
+  window.addEventListener('settings-change', loadSettings);
 });
 
 onUnmounted(() => {
   if (pollTimer) window.clearInterval(pollTimer);
   if (countTimer) window.clearInterval(countTimer);
+  if (settingsTimer) window.clearInterval(settingsTimer);
   window.removeEventListener('user-change', onUserChange);
   window.removeEventListener('keydown', onKey);
+  window.removeEventListener('settings-change', loadSettings);
 });
 </script>
 
@@ -369,18 +390,21 @@ onUnmounted(() => {
           <span>Pozostało: {{ formattedTimeLeft }}</span>
         </div>
 
-        <div v-if="auction.status !== 'ENDED' && hasStarted" class="space-y-2">
-          <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 select-none">PLN</span>
-            <input v-model="bidAmount" type="number" class="w-full h-11 rounded-xl border pl-12 pr-3 focus:outline-none focus:ring" :min="minBidPLN" />
+        <div v-if="auction.status !== 'ENDED' && hasStarted">
+          <div v-if="!auctionClosed" class="space-y-2">
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 select-none">PLN</span>
+              <input v-model="bidAmount" type="number" class="w-full h-11 rounded-xl border pl-12 pr-3 focus:outline-none focus:ring" :min="minBidPLN" />
+            </div>
+            <p v-if="bidError" class="text-sm text-red-600">{{ bidError }}</p>
+            <button @click="placeBid" :disabled="!canBid" :aria-disabled="!canBid"
+                    class="w-full h-11 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+              <span v-if="!loading">Licytuj</span>
+              <span v-else class="animate-pulse">...</span>
+            </button>
+            <p class="text-sm text-gray-500">Min. przebicie: {{ toPLN(auction.minIncrement) }} PLN</p>
           </div>
-          <p v-if="bidError" class="text-sm text-red-600">{{ bidError }}</p>
-          <button @click="placeBid" :disabled="!canBid" :aria-disabled="!canBid"
-                  class="w-full h-11 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-            <span v-if="!loading">Licytuj</span>
-            <span v-else class="animate-pulse">...</span>
-          </button>
-          <p class="text-sm text-gray-500">Min. przebicie: {{ toPLN(auction.minIncrement) }} PLN</p>
+          <p v-else class="text-gray-500">Dom aukcyjny jest zamknięty.</p>
         </div>
         <p v-else-if="auction.status !== 'ENDED'" class="text-gray-500">Aukcja jeszcze się nie rozpoczęła.</p>
 
