@@ -7,8 +7,10 @@ const endpointCache = { url: "" };
 const maxActiveAuctions = ref<number | null>(null);
 const maxWonAuctions = ref<number | null>(null);
 const nextAuctionIso = ref<string | null>(null);
+const auctionCloseIso = ref<string | null>(null);
 
 const nextAuctionLocal = ref<string>(""); // YYYY-MM-DDTHH:mm
+const auctionCloseLocal = ref<string>("");
 function formatDisplay(iso: string) {
   const d = new Date(iso);
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -62,12 +64,23 @@ function normalizeSettings(data: any) {
     maxActiveAuctions: Number(data.maxActiveAuctions ?? data.max_active_auctions ?? data.maxActive ?? 0),
     maxWonAuctions: Number(data.maxWonAuctions ?? data.max_won_auctions ?? data.maxWon ?? 0),
     nextAuctionIso:
-      data.nextAuctionIso ??
-      data.nextAuctionAt ??
-      data.nextAuctionDate ??
-      data.nextAuction ??
+      data.nextAuctionIso ||
+      data.nextAuctionAt ||
+      data.nextAuctionDate ||
+      data.nextAuction ||
       null,
-  } as { maxActiveAuctions: number; maxWonAuctions: number; nextAuctionIso: string | null };
+    auctionCloseIso:
+      data.auctionCloseIso ||
+      data.auctionCloseAt ||
+      data.auctionCloseDate ||
+      data.auctionClose ||
+      null,
+  } as {
+    maxActiveAuctions: number;
+    maxWonAuctions: number;
+    nextAuctionIso: string | null;
+    auctionCloseIso: string | null;
+  };
 }
 
 /* ===== LOAD ===== */
@@ -80,7 +93,9 @@ async function load() {
     maxActiveAuctions.value = norm.maxActiveAuctions;
     maxWonAuctions.value = norm.maxWonAuctions;
     nextAuctionIso.value = norm.nextAuctionIso;
+    auctionCloseIso.value = norm.auctionCloseIso;
     nextAuctionLocal.value = nextAuctionIso.value ? toLocalInputValue(nextAuctionIso.value) : "";
+    auctionCloseLocal.value = auctionCloseIso.value ? toLocalInputValue(auctionCloseIso.value) : "";
   } catch (e:any) {
     console.error("Load settings failed", e);
     message.value = { type: "err", text: e?.message || "Nie udało się pobrać ustawień." };
@@ -96,6 +111,7 @@ async function save() {
 
     // przygotuj payload z możliwymi nazwami – backend wybierze co zna
     const iso = nextAuctionLocal.value ? fromLocalInputValue(nextAuctionLocal.value) : null;
+    const close = auctionCloseLocal.value ? fromLocalInputValue(auctionCloseLocal.value) : null;
     const payload = {
       maxActiveAuctions: maxActiveAuctions.value,
       max_won_auctions: maxWonAuctions.value,           // alias snake_case
@@ -104,6 +120,10 @@ async function save() {
       nextAuctionAt: iso,                                // alias
       nextAuctionDate: iso,                              // alias
       nextAuction: iso,                                  // alias
+      auctionCloseIso: close,
+      auctionCloseAt: close,                             // alias
+      auctionCloseDate: close,                           // alias
+      auctionClose: close,                               // alias
     };
 
     const tryMethods = [
@@ -140,7 +160,16 @@ async function clearSchedule() {
   try {
     const url = await resolveSettingsEndpoint();
     // wysyłamy różne klucze null – backend którykolwiek przyjmie
-    const payload = { nextAuctionIso: null, nextAuctionAt: null, nextAuctionDate: null, nextAuction: null };
+    const payload = {
+      nextAuctionIso: null,
+      nextAuctionAt: null,
+      nextAuctionDate: null,
+      nextAuction: null,
+      auctionCloseIso: null,
+      auctionCloseAt: null,
+      auctionCloseDate: null,
+      auctionClose: null,
+    };
     // też z fallbackiem metody
     let ok = false;
     try { ok = (await api.patch(url, payload)).status < 300; } catch {}
@@ -195,6 +224,11 @@ onMounted(load);
             <input v-model="nextAuctionLocal" type="datetime-local" />
           </label>
 
+          <label>
+            Data i godzina zamknięcia panelu aukcji (opcjonalnie):
+            <input v-model="auctionCloseLocal" type="datetime-local" />
+          </label>
+
           <div class="actions">
             <button class="btn primary" :disabled="saving" @click="save">
               {{ saving ? 'Zapisywanie…' : 'Zapisz' }}
@@ -204,6 +238,7 @@ onMounted(load);
 
           <p v-if="message" :class="['msg', message.type]">{{ message.text }}</p>
           <p class="hint">Aktualny termin: <strong>{{ nextAuctionIso ? formatDisplay(nextAuctionIso) : 'brak' }}</strong></p>
+          <p class="hint">Aktualne zamknięcie: <strong>{{ auctionCloseIso ? formatDisplay(auctionCloseIso) : 'brak' }}</strong></p>
         </div>
       </main>
     </div>

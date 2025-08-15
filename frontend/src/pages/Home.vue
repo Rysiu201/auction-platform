@@ -18,6 +18,7 @@ type Settings = {
   maxActiveAuctions: number;
   maxWonAuctions: number;
   nextAuctionIso: string | null; // ISO string albo null
+  auctionCloseIso: string | null; // ISO zamknięcia lub null
 };
 
 const endingSoon = ref<Auction[]>([]);
@@ -30,7 +31,7 @@ async function loadSettings() {
     const { data } = await api.get("/settings");
     settings.value = data;
   } catch {
-    settings.value = { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: null };
+    settings.value = { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: null, auctionCloseIso: null };
   }
 }
 
@@ -42,7 +43,20 @@ const targetMs = computed(() => {
 const msLeft = ref(0);
 const hasSchedule = computed(() => targetMs.value !== null);
 const hasCountdown = computed(() => hasSchedule.value && msLeft.value > 0);
-const auctionsActive = computed(() => hasSchedule.value && msLeft.value <= 0);
+const closeMs = computed(() => {
+  const iso = settings.value?.auctionCloseIso ?? null;
+  return iso ? new Date(iso).getTime() : null;
+});
+const auctionsActive = computed(() => {
+  const startReady = hasSchedule.value && msLeft.value <= 0;
+  if (!startReady) return false;
+  const c = closeMs.value;
+  return c === null || Date.now() < c;
+});
+const auctionClosed = computed(() => {
+  const c = closeMs.value;
+  return c !== null && Date.now() >= c;
+});
 
 function updateMsLeft() {
   msLeft.value = targetMs.value ? Math.max(0, targetMs.value - Date.now()) : 0;
@@ -176,6 +190,9 @@ const conditionColor: Record<string, string> = {
     <p v-else-if="auctionsActive" class="auction-running">
       Aktualnie trwa aukcja.
     </p>
+    <p v-else-if="auctionClosed" class="auction-closed">
+      Panel aukcyjny jest zamknięty.
+    </p>
     <div v-else class="countdown" role="timer" aria-live="polite">
       {{ formattedTime }}
     </div>
@@ -201,6 +218,9 @@ const conditionColor: Record<string, string> = {
 .no-schedule{ color:#6b7c8a; margin-bottom:8px; }
 .auction-running{
   color:#fff; background:#0059b3; padding:4px 8px; border-radius:4px; font-weight:600;
+}
+.auction-closed{
+  color:#b00020; font-weight:600;
 }
 
 /* ================== 3 aukcje najbliższe zakończeniu ================== */

@@ -103,112 +103,123 @@ async function toggleFavorite(a: Auction, e: Event) {
   <p v-if="loading">Ładowanie…</p>
   <p v-if="error" style="color:red">{{ error }}</p>
 
-  <h2>Obserwowane ({{ favorites.length }})</h2>
-  <div v-if="!loading && favorites.length" class="auction-grid">
-    <router-link
-      v-for="a in favorites"
-      :key="a.id"
-      :to="`/auction/${a.id}`"
-      class="auction-link"
-    >
-      <article class="auction-card">
-        <button
-          class="fav-btn text-xl"
-          @click="toggleFavorite(a, $event)"
-          :class="
-            isFavorite(a.id)
-              ? 'text-amber-400 hover:text-amber-500'
-              : 'text-slate-400 hover:text-slate-500'
-          "
-        >★</button>
-        <div class="image-wrapper">
-          <img
-            v-if="a.images?.[0]"
-            :src="`${backend}${a.images[0].url}`"
-            alt=""
-            class="auction-image"
-          />
-          <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
-            {{ conditionLabel[a.condition] || a.condition }}
-          </span>
-        </div>
-        <div class="auction-info">
-          <h3 class="auction-title">{{ a.title }}</h3>
-          <div class="auction-price">{{ currentPrice(a) }} PLN</div>
-          <div class="auction-offers">{{ a.bids.length }} ofert</div>
-        </div>
-        <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
-      </article>
-    </router-link>
-  </div>
-  <p v-if="!loading && !favorites.length">Brak aukcji.</p>
+  <div class="sections">
+    <div class="auction-box">
+      <h2>Obserwowane ({{ favorites.length }})</h2>
+      <div v-if="!loading && favorites.length" class="auction-grid">
+        <router-link
+          v-for="a in favorites"
+          :key="a.id"
+          :to="`/auction/${a.id}`"
+          class="auction-link"
+        >
+          <article class="auction-card">
+            <button
+              class="fav-btn text-xl"
+              @click="toggleFavorite(a, $event)"
+              :class="
+                isFavorite(a.id)
+                  ? 'text-amber-400 hover:text-amber-500'
+                  : 'text-slate-400 hover:text-slate-500'
+              "
+            >★</button>
+            <div class="image-wrapper">
+              <img
+                v-if="a.images?.[0]"
+                :src="`${backend}${a.images[0].url}`"
+                alt=""
+                class="auction-image"
+              />
+              <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
+                {{ conditionLabel[a.condition] || a.condition }}
+              </span>
+            </div>
+            <div class="auction-info">
+              <h3 class="auction-title">{{ a.title }}</h3>
+              <div class="auction-price">{{ currentPrice(a) }} PLN</div>
+              <div class="auction-offers">{{ a.bids.length }} ofert</div>
+            </div>
+            <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
+          </article>
+        </router-link>
+      </div>
+      <p v-if="!loading && !favorites.length">Brak aukcji.</p>
+    </div>
 
-  <h2>Zwyciężone ({{ won.length }})</h2>
-  <div v-if="!loading && won.length" class="auction-grid">
-    <router-link
-      v-for="a in won"
-      :key="a.id"
-      :to="`/auction/${a.id}`"
-      class="auction-link"
-    >
-      <article class="auction-card">
-        <div class="image-wrapper">
-          <img
-            v-if="a.images?.[0]"
-            :src="`${backend}${a.images[0].url}`"
-            alt=""
-            class="auction-image"
-          />
-          <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
-            {{ conditionLabel[a.condition] || a.condition }}
-          </span>
-        </div>
-        <div class="auction-info">
-          <h3 class="auction-title">{{ a.title }}</h3>
-          <div class="auction-price">{{ currentPrice(a) }} PLN</div>
-          <div class="auction-offers">{{ a.bids.length }} ofert</div>
-        </div>
-        <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
-      </article>
-    </router-link>
-  </div>
-  <p v-if="!loading && !won.length">Brak aukcji.</p>
+    <div class="auction-box">
+      <h2>Zwyciężone ({{ won.length }})</h2>
+      <div v-if="!loading && won.length" class="auction-grid">
+        <router-link
+          v-for="a in won"
+          :key="a.id"
+          :to="`/auction/${a.id}`"
+          class="auction-link"
+        >
+          <article class="auction-card">
+            <div class="image-wrapper">
+              <img
+                v-if="a.images?.[0]"
+                :src="`${backend}${a.images[0].url}``
+                alt=""
+                class="auction-image"
+              />
+              <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
+                {{ conditionLabel[a.condition] || a.condition }}
+              </span>
+            </div>
+            <div class="auction-info">
+              <h3 class="auction-title">{{ a.title }}</h3>
+              <div class="auction-price">{{ currentPrice(a) }} PLN</div>
+              <div class="auction-offers">{{ a.bids.length }} ofert</div>
+            </div>
+            <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
+          </article>
+        </router-link>
+      </div>
+      <p v-if="!loading && !won.length">Brak aukcji.</p>
+    </div>
 
-  <h2>Przebite ({{ outbid.length }})</h2>
-  <div v-if="!loading && outbid.length" class="auction-grid">
-    <router-link
-      v-for="a in outbid"
-      :key="a.id"
-      :to="`/auction/${a.id}`"
-      class="auction-link"
-    >
-      <article class="auction-card">
-        <div class="image-wrapper">
-          <img
-            v-if="a.images?.[0]"
-            :src="`${backend}${a.images[0].url}`"
-            alt=""
-            class="auction-image"
-          />
-          <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
-            {{ conditionLabel[a.condition] || a.condition }}
-          </span>
-        </div>
-        <div class="auction-info">
-          <h3 class="auction-title">{{ a.title }}</h3>
-          <div class="auction-price">{{ currentPrice(a) }} PLN</div>
-          <div class="auction-offers">{{ a.bids.length }} ofert</div>
-        </div>
-        <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
-      </article>
-    </router-link>
+    <div class="auction-box">
+      <h2>Przebite ({{ outbid.length }})</h2>
+      <div v-if="!loading && outbid.length" class="auction-grid">
+        <router-link
+          v-for="a in outbid"
+          :key="a.id"
+          :to="`/auction/${a.id}`"
+          class="auction-link"
+        >
+          <article class="auction-card">
+            <div class="image-wrapper">
+              <img
+                v-if="a.images?.[0]"
+                :src="`${backend}${a.images[0].url}``
+                alt=""
+                class="auction-image"
+              />
+              <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
+                {{ conditionLabel[a.condition] || a.condition }}
+              </span>
+            </div>
+            <div class="auction-info">
+              <h3 class="auction-title">{{ a.title }}</h3>
+              <div class="auction-price">{{ currentPrice(a) }} PLN</div>
+              <div class="auction-offers">{{ a.bids.length }} ofert</div>
+            </div>
+            <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
+          </article>
+        </router-link>
+      </div>
+      <p v-if="!loading && !outbid.length">Brak aukcji.</p>
+    </div>
   </div>
-  <p v-if="!loading && !outbid.length">Brak aukcji.</p>
   </section>
 </template>
 
 <style scoped>
 .page-section { padding:40px 20px; text-align:center; }
+.sections { display:grid; gap:20px; }
+.auction-box { background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+.auction-box h2 { margin-top:0; }
 .condition-badge{
   text-align: center;
   color:black;

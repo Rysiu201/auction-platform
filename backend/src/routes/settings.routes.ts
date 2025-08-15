@@ -18,6 +18,7 @@ settingsRouter.get("/", async (_req, res) => {
     maxActiveAuctions: s.maxActiveAuctions,
     maxWonAuctions: s.maxWonAuctions,
     nextAuctionIso: s.nextAuctionIso,
+    auctionCloseIso: s.auctionCloseIso,
   });
 });
 
@@ -39,6 +40,15 @@ const saveHandler = async (req: any, res: any) => {
   if (iso !== undefined) {
     data.nextAuctionIso = iso ? new Date(iso) : null;
   }
+  const closeIso =
+    body.auctionCloseIso ||
+    body.auctionCloseAt ||
+    body.auctionCloseDate ||
+    body.auctionClose ||
+    null;
+  if (closeIso !== undefined) {
+    data.auctionCloseIso = closeIso ? new Date(closeIso) : null;
+  }
   const s = await prisma.settings.upsert({
     where: { id: 1 },
     update: data,
@@ -48,6 +58,7 @@ const saveHandler = async (req: any, res: any) => {
     maxActiveAuctions: s.maxActiveAuctions,
     maxWonAuctions: s.maxWonAuctions,
     nextAuctionIso: s.nextAuctionIso,
+    auctionCloseIso: s.auctionCloseIso,
   });
 };
 
