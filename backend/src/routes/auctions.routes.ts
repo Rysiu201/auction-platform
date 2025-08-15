@@ -80,6 +80,40 @@ auctionsRouter.get("/my", requireAuth, async (req, res) => {
   res.json(favorites.map((f) => f.auction));
 });
 
+// -------- WYGRANE ---------
+auctionsRouter.get("/my/won", requireAuth, async (req, res) => {
+  const user = (req as any).user as { id: string };
+  const won = await prisma.auction.findMany({
+    where: { status: "ENDED", winnerBid: { userId: user.id } },
+    include: { images: true, bids: true },
+    orderBy: { endsAt: "desc" },
+  });
+  res.json(won);
+});
+
+// -------- PRZEBITE ---------
+auctionsRouter.get("/my/outbid", requireAuth, async (req, res) => {
+  const user = (req as any).user as { id: string };
+  const withBids = await prisma.auction.findMany({
+    where: { status: "ACTIVE", bids: { some: { userId: user.id } } },
+    include: {
+      images: true,
+      bids: {
+        orderBy: { amount: "desc" },
+        include: { user: { select: { id: true } } },
+      },
+    },
+    orderBy: { endsAt: "asc" },
+  });
+  const outbid = withBids.filter((a) => a.bids[0]?.userId !== user.id);
+  res.json(
+    outbid.map((a) => ({
+      ...a,
+      bids: a.bids.map((b) => ({ amount: b.amount })),
+    }))
+  );
+});
+
 // --------------------------- SZCZEGÓŁ ----------------------------
 auctionsRouter.get("/:id", async (req, res) => {
   const a = await prisma.auction.findUnique({

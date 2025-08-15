@@ -20,7 +20,7 @@ type Settings = {
   nextAuctionIso: string | null; // ISO string albo null
 };
 
-const latest = ref<Auction[]>([]);
+const endingSoon = ref<Auction[]>([]);
 const settings = ref<Settings | null>(null);
 
 let intervalId: number | null = null;
@@ -75,8 +75,8 @@ function stopCountdown() {
 /* ---- DATA ---- */
 onMounted(async () => {
   try {
-    const { data } = await api.get("/auctions", { params: { limit: 3, sort: "latest" } });
-    latest.value = data;
+    const { data } = await api.get("/auctions", { params: { limit: 3 } });
+    endingSoon.value = data;
   } catch { /* ignore */ }
 
   await loadSettings();
@@ -136,33 +136,36 @@ const conditionColor: Record<string, string> = {
       Dołącz do naszych licytacji firmowego sprzętu komputerowego – głównie laptopów używanych w różnym stanie technicznym. Każdy przedmiot ma indywidualny opis…
     </p>
 
-    <div v-if="auctionsActive && latest.length" class="latest-auctions auction-grid">
-      <router-link
-        v-for="a in latest"
-        :key="a.id"
-        :to="`/auction/${a.id}`"
-        class="auction-link"
-      >
-        <article class="auction-card">
-          <div class="image-wrapper">
-            <img
-              v-if="a.images?.[0]"
-              :src="`${backend}${a.images[0].url}`"
-              alt=""
-              class="auction-image"
-            />
-            <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
-              {{ conditionLabel[a.condition] || a.condition }}
-            </span>
-          </div>
-          <div class="auction-info">
-            <h3 class="auction-title">{{ a.title }}</h3>
-            <div class="auction-price">{{ currentPrice(a) }} PLN</div>
-            <div class="auction-offers">{{ a.bids.length }} ofert</div>
-          </div>
-          <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
-        </article>
-      </router-link>
+    <div v-if="auctionsActive && endingSoon.length" class="ending-auctions">
+      <p><strong>3 aukcje najbliższe zakończeniu</strong></p>
+      <div class="auction-grid">
+        <router-link
+          v-for="a in endingSoon"
+          :key="a.id"
+          :to="`/auction/${a.id}`"
+          class="auction-link"
+        >
+          <article class="auction-card">
+            <div class="image-wrapper">
+              <img
+                v-if="a.images?.[0]"
+                :src="`${backend}${a.images[0].url}`"
+                alt=""
+                class="auction-image"
+              />
+              <span class="condition-badge" :style="{ background: conditionColor[a.condition] }">
+                {{ conditionLabel[a.condition] || a.condition }}
+              </span>
+            </div>
+            <div class="auction-info">
+              <h3 class="auction-title">{{ a.title }}</h3>
+              <div class="auction-price">{{ currentPrice(a) }} PLN</div>
+              <div class="auction-offers">{{ a.bids.length }} ofert</div>
+            </div>
+            <div class="auction-end">⏰ {{ fmtDate(a.endsAt) }}</div>
+          </article>
+        </router-link>
+      </div>
     </div>
 
     <div class="next-auctions"><strong>Następna Pula Aukcji:</strong></div>
@@ -177,7 +180,7 @@ const conditionColor: Record<string, string> = {
       {{ formattedTime }}
     </div>
 
-    <router-link v-if="auctionsActive && latest.length" to="/auctions" class="cta-button">Zobacz Aktualne Aukcje</router-link>
+    <router-link v-if="auctionsActive && endingSoon.length" to="/auctions" class="cta-button">Zobacz Aktualne Aukcje</router-link>
   </section>
 </template>
 
@@ -200,8 +203,8 @@ const conditionColor: Record<string, string> = {
   color:#fff; background:#0059b3; padding:4px 8px; border-radius:4px; font-weight:600;
 }
 
-/* ================== 3 najnowsze aukcje ================== */
-.latest-auctions,
+/* ================== 3 aukcje najbliższe zakończeniu ================== */
+.ending-auctions{ margin-top:30px; text-align:center; }
 .auction-grid{
   margin-top: 30px;
   display:flex;
