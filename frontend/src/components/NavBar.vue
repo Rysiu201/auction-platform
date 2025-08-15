@@ -69,7 +69,7 @@ function logout() {
             <router-link to="/my-auctions" @click="menuOpen=false">Moje Aukcje</router-link>
           </div>
         </div>
-        <router-link v-else to="/my-auctions" class="admin-link">Moje Aukcje</router-link>
+        <router-link v-else to="/my-auctions" class="user-link">Moje Aukcje</router-link>
       </div>
       <router-link class="login-button" v-if="!user" to="/login">Zaloguj</router-link>
       <span v-else class="welcome">Witaj, <strong class="username">{{ user.name }}</strong></span>
@@ -115,5 +115,27 @@ function logout() {
 
 .username{
   font-weight: bold;
+}
+
+.user-link{
+  justify-content: center;
+  position:flex; 
+  align-items: center;
+  width: 8vh;
+  height: 3.0vh;
+  right:0; 
+  background:#fff; 
+  border:1vh solid slategray; 
+  display:flex;
+  border-radius: 2vh;
+  text-align: center;
+  border-width: 0.2vh;
+  background-color: #65A30D;
+  color: white
+}
+
+.user-link:hover{
+  background: #79b623;
+  border-color: #79b623;
 }
 </style>
