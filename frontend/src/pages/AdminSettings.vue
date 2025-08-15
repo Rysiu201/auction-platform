@@ -8,6 +8,7 @@ const maxActiveAuctions = ref<number | null>(null);
 const maxWonAuctions = ref<number | null>(null);
 const nextAuctionIso = ref<string | null>(null);
 const auctionCloseIso = ref<string | null>(null);
+const auctionCloseNoticeSec = ref<number | null>(null);
 
 const nextAuctionLocal = ref<string>(""); // YYYY-MM-DDTHH:mm
 const auctionCloseLocal = ref<string>("");
@@ -75,11 +76,13 @@ function normalizeSettings(data: any) {
       data.auctionCloseDate ||
       data.auctionClose ||
       null,
+    auctionCloseNoticeSec: Number(data.auctionCloseNoticeSec ?? 0),
   } as {
     maxActiveAuctions: number;
     maxWonAuctions: number;
     nextAuctionIso: string | null;
     auctionCloseIso: string | null;
+    auctionCloseNoticeSec: number;
   };
 }
 
@@ -94,6 +97,7 @@ async function load() {
     maxWonAuctions.value = norm.maxWonAuctions;
     nextAuctionIso.value = norm.nextAuctionIso;
     auctionCloseIso.value = norm.auctionCloseIso;
+    auctionCloseNoticeSec.value = norm.auctionCloseNoticeSec;
     nextAuctionLocal.value = nextAuctionIso.value ? toLocalInputValue(nextAuctionIso.value) : "";
     auctionCloseLocal.value = auctionCloseIso.value ? toLocalInputValue(auctionCloseIso.value) : "";
   } catch (e:any) {
@@ -124,6 +128,7 @@ async function save() {
       auctionCloseAt: close,                             // alias
       auctionCloseDate: close,                           // alias
       auctionClose: close,                               // alias
+      auctionCloseNoticeSec: auctionCloseNoticeSec.value,
     };
 
     const tryMethods = [
@@ -227,6 +232,11 @@ onMounted(load);
           <label>
             Data i godzina zamknięcia panelu aukcji (opcjonalnie):
             <input v-model="auctionCloseLocal" type="datetime-local" />
+          </label>
+
+          <label>
+            Sekundy przed zamknięciem dla powiadomienia:
+            <input v-model.number="auctionCloseNoticeSec" type="number" min="0" />
           </label>
 
           <div class="actions">

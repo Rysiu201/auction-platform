@@ -119,4 +119,5 @@ model Settings {
   maxWonAuctions    Int       @default(0)
   nextAuctionIso    DateTime?
   auctionCloseIso   DateTime?
+  auctionCloseNoticeSec Int   @default(0)
 }

@@ -11,7 +11,7 @@ vi.mock('@/api', () => ({
         return Promise.resolve({ data: [] });
       }
       if (url === '/settings') {
-        return Promise.resolve({ data: { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: futureIso, auctionCloseIso: null } });
+        return Promise.resolve({ data: { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: futureIso, auctionCloseIso: null, auctionCloseNoticeSec: 0 } });
       }
       return Promise.resolve({ data: null });
     }

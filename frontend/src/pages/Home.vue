@@ -18,6 +18,8 @@ type Settings = {
   maxActiveAuctions: number;
   maxWonAuctions: number;
   nextAuctionIso: string | null; // ISO string albo null
+  auctionCloseIso: string | null;
+  auctionCloseNoticeSec: number;
 };
 
 const endingSoon = ref<Auction[]>([]);
@@ -31,7 +33,7 @@ async function loadSettings() {
     const { data } = await api.get("/settings");
     settings.value = data;
   } catch {
-    settings.value = { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: null };
+    settings.value = { maxActiveAuctions: 0, maxWonAuctions: 0, nextAuctionIso: null, auctionCloseIso: null, auctionCloseNoticeSec: 0 };
   }
 }
 
