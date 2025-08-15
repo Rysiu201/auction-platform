@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { api } from "@/api";
 
 const router = useRouter();
+const route = useRoute();
 const email = ref("admin@local.test");
 const password = ref("Admin123!");
 const loading = ref(false); const error = ref<string|null>(null);
+
+function redirectAfterLogin() {
+  router.push((route.query.redirect as string) || "/");
+}
 
 async function submit() {
   loading.value = true; error.value = null;
@@ -14,7 +19,7 @@ async function submit() {
     const { data } = await api.post("/auth/login", { email: email.value, password: password.value });
     localStorage.setItem("user", JSON.stringify(data));
     window.dispatchEvent(new Event("user-change"));
-    router.push("/");
+    redirectAfterLogin();
   } catch (e:any) {
     error.value = e?.response?.data?.message ?? "Błąd logowania";
   } finally { loading.value = false; }
@@ -26,7 +31,7 @@ async function loginSSO() {
     const { data } = await api.post("/auth/sso");
     localStorage.setItem("user", JSON.stringify(data));
     window.dispatchEvent(new Event("user-change"));
-    router.push("/");
+    redirectAfterLogin();
   } catch (e:any) {
     error.value = e?.response?.data?.message ?? "Błąd logowania SSO";
   } finally { loading.value = false; }
@@ -38,7 +43,7 @@ async function loginLDAP() {
     const { data } = await api.post("/auth/ldap", { username: email.value, password: password.value });
     localStorage.setItem("user", JSON.stringify(data));
     window.dispatchEvent(new Event("user-change"));
-    router.push("/");
+    redirectAfterLogin();
   } catch (e:any) {
     error.value = e?.response?.data?.message ?? "Błąd logowania LDAP";
   } finally { loading.value = false; }
