@@ -157,8 +157,8 @@ function logout() {
 
 .close-bubble {
   position: fixed;
-  top: 10px;
-  right: 10px;
+  top: 5.5vh;
+  right: 0.5vh;
   background: #ff4f64;
   color: #fff;
   padding: 6px 12px;
