@@ -15,9 +15,15 @@ const menuOpen = ref(false);
 const settings = ref<{ nextAuctionIso: string | null; auctionCloseIso: string | null } | null>(null);
 const now = ref(Date.now());
 let timer: number | null = null;
+const notification = ref<string | null>(null);
 
 async function loadSettings() {
   try { const { data } = await api.get('/settings'); settings.value = data; } catch {}
+}
+
+function onNotify(e: Event) {
+  notification.value = (e as CustomEvent<string>).detail;
+  window.setTimeout(() => { notification.value = null; }, 3000);
 }
 
 onMounted(async () => {
@@ -26,12 +32,14 @@ onMounted(async () => {
   timer = window.setInterval(() => { now.value = Date.now(); }, 1000);
   window.addEventListener('user-change', loadUser);
   window.addEventListener('settings-change', loadSettings);
+  window.addEventListener('notify', onNotify as any);
 });
 
 onBeforeUnmount(() => {
   if (timer) clearInterval(timer);
   window.removeEventListener('user-change', loadUser);
   window.removeEventListener('settings-change', loadSettings);
+  window.removeEventListener('notify', onNotify as any);
 });
 
 const auctionsActive = computed(() => {
@@ -92,6 +100,7 @@ function logout() {
     </div>
   </header>
   <div v-if="auctionsActive && closeCountdown" class="close-bubble">Zamknięcie za {{ closeCountdown }}</div>
+  <div v-if="notification" class="notify-bubble">{{ notification }}</div>
 </template>
 
 <style scoped>
@@ -160,6 +169,18 @@ function logout() {
   top: 5.5vh;
   right: 0.5vh;
   background: #ff4f64;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+.notify-bubble {
+  position: fixed;
+  top: 1vh;
+  right: 0.5vh;
+  background: #0059b3;
   color: #fff;
   padding: 6px 12px;
   border-radius: 8px;
