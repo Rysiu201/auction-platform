@@ -12,7 +12,7 @@ function loadUser() {
 const isAdmin = computed(() => user.value?.role === 'ADMIN');
 const menuOpen = ref(false);
 
-const settings = ref<{ nextAuctionIso: string | null } | null>(null);
+const settings = ref<{ nextAuctionIso: string | null; auctionCloseIso: string | null } | null>(null);
 const now = ref(Date.now());
 let timer: number | null = null;
 
@@ -35,9 +35,24 @@ onBeforeUnmount(() => {
 });
 
 const auctionsActive = computed(() => {
-  const iso = settings.value?.nextAuctionIso;
-  if (!iso) return false;
-  return new Date(iso).getTime() <= now.value;
+  const startIso = settings.value?.nextAuctionIso;
+  const closeIso = settings.value?.auctionCloseIso;
+  if (!startIso) return false;
+  const start = new Date(startIso).getTime();
+  const close = closeIso ? new Date(closeIso).getTime() : Infinity;
+  return start <= now.value && now.value < close;
+});
+
+const closeCountdown = computed(() => {
+  const closeIso = settings.value?.auctionCloseIso;
+  if (!closeIso) return null;
+  const ms = new Date(closeIso).getTime() - now.value;
+  if (ms <= 0) return null;
+  const total = Math.floor(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 });
 
 function logout() {
@@ -76,6 +91,7 @@ function logout() {
       <button v-if="user" class="btn logout-btn" @click="logout">Wyloguj</button>
     </div>
   </header>
+  <div v-if="auctionsActive && closeCountdown" class="close-bubble">Zamknięcie za {{ closeCountdown }}</div>
 </template>
 
 <style scoped>
@@ -137,5 +153,17 @@ function logout() {
 .user-link:hover{
   background: #79b623;
   border-color: #79b623;
+}
+
+.close-bubble {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #ff4f64;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 1000;
 }
 </style>

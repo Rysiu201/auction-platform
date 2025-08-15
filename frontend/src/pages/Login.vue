@@ -50,8 +50,14 @@ async function loginLDAP() {
     <div class="login-card">
       <h1>Logowanie</h1>
       <form @submit.prevent="submit" class="login-form">
-        <input v-model="email" type="email" placeholder="email" required />
-        <input v-model="password" type="password" placeholder="hasło" required />
+        <label class="field">
+          <span class="label">Login</span>
+          <input v-model="email" type="email" required />
+        </label>
+        <label class="field">
+          <span class="label">Hasło</span>
+          <input v-model="password" type="password" required />
+        </label>
         <button :disabled="loading" type="submit">Zaloguj</button>
       </form>
       <div class="alt-logins">
