@@ -27,7 +27,7 @@ const timeLeft = ref(0);
 const user = ref<any>(null);
 const isFavorite = ref(false);
 const loading = ref(false);
-const settings = ref<{ auctionCloseIso: string | null } | null>(null);
+const settings = ref<{ auctionCloseIso: string | null; auctionCloseNoticeSec: number } | null>(null);
 const now = ref(Date.now());
 let settingsTimer: number | undefined;
 

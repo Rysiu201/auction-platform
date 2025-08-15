@@ -12,7 +12,7 @@ function loadUser() {
 const isAdmin = computed(() => user.value?.role === 'ADMIN');
 const menuOpen = ref(false);
 
-const settings = ref<{ nextAuctionIso: string | null; auctionCloseIso: string | null } | null>(null);
+const settings = ref<{ nextAuctionIso: string | null; auctionCloseIso: string | null; auctionCloseNoticeSec: number } | null>(null);
 const now = ref(Date.now());
 let timer: number | null = null;
 const notification = ref<string | null>(null);
@@ -51,16 +51,26 @@ const auctionsActive = computed(() => {
   return start <= now.value && now.value < close;
 });
 
-const closeCountdown = computed(() => {
+const closeMs = computed(() => {
   const closeIso = settings.value?.auctionCloseIso;
-  if (!closeIso) return null;
-  const ms = new Date(closeIso).getTime() - now.value;
-  if (ms <= 0) return null;
+  return closeIso ? new Date(closeIso).getTime() - now.value : null;
+});
+
+const closeCountdown = computed(() => {
+  const ms = closeMs.value;
+  if (ms === null || ms <= 0) return null;
   const total = Math.floor(ms / 1000);
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+});
+
+const showCloseBubble = computed(() => {
+  const ms = closeMs.value;
+  if (ms === null || ms <= 0) return false;
+  const notice = settings.value?.auctionCloseNoticeSec ?? 0;
+  return ms <= notice * 1000;
 });
 
 function logout() {
@@ -99,7 +109,7 @@ function logout() {
       <button v-if="user" class="btn logout-btn" @click="logout">Wyloguj</button>
     </div>
   </header>
-  <div v-if="auctionsActive && closeCountdown" class="close-bubble">Zamknięcie za {{ closeCountdown }}</div>
+  <div v-if="auctionsActive && showCloseBubble && closeCountdown" class="close-bubble">Zamknięcie za {{ closeCountdown }}</div>
   <div v-if="notification" class="notify-bubble">{{ notification }}</div>
 </template>
 
