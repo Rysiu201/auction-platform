@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// brak logiki
+import { RouterLink } from "vue-router";
 </script>
 
 <template>
@@ -141,7 +141,7 @@
       <div class="footer-inner">
         <h2>Kontakt</h2>
         <p>Masz pytania? Napisz do nas – chętnie pomożemy przed licytacją.</p>
-        <a class="btn" href="mailto:servicedesk@twojadomena.pl">Napisz do nas</a>
+        <RouterLink class="btn" to="/contact">Napisz do nas</RouterLink>
       </div>
     </footer>
   </div>
@@ -154,7 +154,7 @@
 
 /* ===== Layout 100svh + sticky footer */
 .page{
-  min-height: 100svh;          /* pełna wysokość widoczna */
+  min-height: 100vh;           /* pełna wysokość widoczna */
   display: flex;
   flex-direction: column;
   background: var(--bg);
@@ -184,11 +184,11 @@
 .card{ background:var(--panel); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:1rem; }
 .pill-list{ list-style:none; padding:0; margin:.6rem 0; display:grid; gap:.5rem; grid-template-columns:repeat(1,minmax(0,1fr)); }
 @media (min-width:640px){ .pill-list{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
-.pill{ display:inline-block; font-size:.75rem; padding:.25rem .5rem; border-radius:999px; margin-right:.4rem; }
+.pill{ display:inline-block; font-size:.875rem; padding:.25rem .5rem; border-radius:999px; margin-right:.4rem; }
 .pill--ok{ background: var(--ok-bg); color: var(--ok-fg); }
 .pill--warn{ background: var(--warn-bg); color: var(--warn-fg); }
 .footnote{ color:var(--muted); font-size:.75rem; margin-top:.35rem; }
-.bullets{ padding-left:1.1rem; margin:0; color:var(--text); }
+.bullets{ list-style: disc; padding-left:1.25rem; margin:0; color:var(--text); }
 .bullets li{ margin:.35rem 0; }
 
 /* ===== Accordion z animacją */
@@ -220,6 +220,9 @@ details[open] .chev::before{ transform: rotate(45deg); }
   background: #0f172a;
   color: #fff;
   padding: 4svh 1.5rem;
+  position: sticky;
+  left: 0;
+  bottom: 0;
 }
 .footer-inner{ max-width: 960px; margin: 0 auto; text-align: center; }
 .site-footer h2{ font-size:1.25rem; font-weight:700; margin:0 0 .75rem; }
